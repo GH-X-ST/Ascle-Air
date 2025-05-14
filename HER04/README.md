@@ -9,3 +9,13 @@ MATLAB Live script to combine and calculate total weight, rotorcraft CG and mome
 ## mass_input.xlsx
 
 Excel document for component or system weights to be input as point masses with displacements from the reference point of the rotorcraft nose.<br>
+
+### Required Inputs:
+
+m: mass in kilograms<br>
+
+x: x-displacement from reference point in metres<br>
+
+y: y-displacement from reference point in metres<br>
+
+z: z-displacement from reference point in metres<br>
