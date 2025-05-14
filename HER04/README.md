@@ -19,3 +19,7 @@ x: x-displacement from reference point in metres<br>
 y: y-displacement from reference point in metres<br>
 
 z: z-displacement from reference point in metres<br>
+
+i_xx, i_yy, i_zz: Moments of Inertia in the x, y and z axes about the component's centre of mass, if the component is to be modelled as a point mass, leave zero<br>
+
+i_xy, i_xz, i_zy: Product Moments of Inertia about the component's centre of mass, if the component is to be modelled as a point mass, leave zero<br>
