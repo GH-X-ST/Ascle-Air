@@ -64,3 +64,60 @@ figure;
 bar(variants, breakEvenUnits, 0.6);
 ylabel('Units to Break-even');
 title('Break-even Units for HER25 Variants');
+
+
+
+
+% Radar chart for HER25 vs competitors (Qualitative Comparison)
+attributes = {'Speed','Range','Payload','Safety','Cost','Versatility'};
+% Qualitative scores (1-10) for HER25, AW109, H145, Bell429
+data = [8, 7, 8, 9, 6, 8;   % HER25 – strong safety (twin+coax), high versatility, moderate cost
+        9, 6, 6, 8, 5, 7;   % AW109 – very fast, but smaller payload, higher cost
+        7, 8, 7, 9, 6, 8;   % H145 – good range/payload, very safe (modern twin), but more expensive
+        8, 7, 6, 8, 5, 6];  % Bell 429 – decent speed, mid range, cost similar to AW109
+% Close the radar data loop by repeating first value at end for plotting
+P = size(attributes,2);
+theta = linspace(0, 2*pi, P+1);
+data_closed = [data, data(:,1)];  % append first column at end for each row
+% Plot
+figure;
+polaraxes; hold on;
+competitors = {'HER25','AW109','Airbus H145','Bell 429'};
+colors = lines(size(data,1));
+for i = 1:size(data,1)
+    polarplot(theta, data_closed(i,:), '-o', 'LineWidth', 1.5, 'Color', colors(i,:), 'DisplayName', competitors{i});
+end
+thetalim([0 360]); % set 0 at right
+% Set radial axis limits and labels
+rlim([0 10]); rticks([0 5 10]); % scores from 0 to 10
+thetaticks(theta(1:end-1)*180/pi); thetaticklabels(attributes);
+legend('Location','southoutside');
+title('HER25 vs Competitors – Attribute Radar Chart');
+
+
+
+% Regional demand potential by segment (relative index values)
+regions = {'Europe','Asia-Pac','Americas'};
+segments = {'EMS','Law Enf','VIP'};
+% Hypothetical demand indices (could represent fleet growth or investment potential)
+demand = [90, 70, 50;   % EMS: Europe high (established), APAC growing, Americas large but mature
+          50, 80, 60;   % Law Enforcement: Europe moderate, APAC high need, Americas also high
+          40, 60, 80];  % VIP/Corporate: Europe moderate, APAC growing wealthy class, Americas highest
+figure;
+bar(demand');  % transpose so that each region becomes a group on x-axis
+set(gca, 'XTickLabel', regions);
+legend(segments, 'Location','northoutside','Orientation','horizontal');
+ylabel('Relative Demand Index');
+title('Regional Demand Potential by Segment');
+
+
+
+% Price vs Range scatter for HER25 and competitors
+models = {'HER25','AW109','Airbus H145','Bell 429','Ka-226','Hill HX50','Jaunt eVTOL'};
+range_km = [650, 830, 650, 760, 600, 1296, 160];  % representative ranges (some ferry range)
+price_usd_m = [7, 6.5, 9, 7.5, 5.5, 1.0, 2.5];     % price in USD millions (approx estimates)
+figure;
+scatter(range_km, price_usd_m, 100, 'filled'); grid on; hold on;
+text(range_km+5, price_usd_m, models, 'FontSize',8);  % label points (offset slightly)
+xlabel('Range (km)'); ylabel('Price (USD millions)');
+title('Price vs Range: HER25 and Competing Aircraft');
