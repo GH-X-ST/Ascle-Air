@@ -19,9 +19,19 @@ t_c = input(15);
 sweep = input(16);
 M_dd = input(17);
 kappa_trans = input(18);
+ISA_factor = input(19);
+T_trans = input(20);
 mu = V_forward ./ (omega * R);
+
+if ISA_factor == 1
+    T1_T2 = ((15 - 0.001981 * h) + T_trans) / ((35 - 1.981 * h * 10^-3) + T_trans);
+    T = T + 20;
+else
+    T1_T2 = 1;
+end
+
 % Pi clac
-CT = Weight/(2*rho_0*(1-6.876*10^-6*h)^4.265*A*omega^2*R^2);
+CT = Weight/(2*rho_0*(1-6.876*10^-6*h)^4.265*T1_T2*A*omega^2*R^2);
 lambda_initial = sqrt(CT/2);
 lambda_n = lambda_initial;
 lambda = zeros(size(V_forward));
@@ -37,7 +47,7 @@ Pi = (kappa_int * Weight/2 * omega * R * 2) .* lambda .* kappa_i;
 
 
 Cpp = (0.5 * f / A) .* mu.^3;
-Pp = Cpp .* (rho_0*(1-6.876*10^-6*h)^4.265 * A * omega^3 * R^3);
+Pp = Cpp .* (rho_0*(1-6.876*10^-6*h)^4.265*T1_T2 * A * omega^3 * R^3);
 
 
 
@@ -72,7 +82,7 @@ for i = 1:length(V_forward)
     end
     delta_Cpo(i) = delta_Cpo2 + delta_Cpo1;
 end
-Po = (Cpo_pure+delta_Cpo) .* (2 * A * omega^3 * R^3 * rho_0*(1-6.876*10^-6*h_M)^4.265);
+Po = (Cpo_pure+delta_Cpo) .* (2 * A * omega^3 * R^3 * rho_0*(1-6.876*10^-6*h_M)^4.265 *T1_T2);
 
 PPP = (Pi + Po + Pp + Paux) .* kappa_trans;
 
