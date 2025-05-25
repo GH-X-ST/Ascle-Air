@@ -33,7 +33,7 @@ function [X, Y, Z, L, M, N, I_xx, I_yy, I_zz, I_xz] = FM(state, ctrl, params)
 %   delta_E   - Elevator deflection (rad)
 %   delta_R   - Rudder deflection (rad)
 %
-%   % params  - [h, m, g, z_R, z_HT, z_VT, x_HT, x_VT]
+%   params    - [h, m, g, z_R, z_HT, z_VT, x_HT, x_VT]
 %   h         - Altitude (m)
 %   m         - Mass (kg)
 %   g         - Acceleration of gravity (m s^-2)

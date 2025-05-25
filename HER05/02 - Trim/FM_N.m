@@ -1,8 +1,11 @@
 function [X, Y, Z, L, M, N, I_xx, I_yy, I_zz, I_xz] = FM_N(state, ctrl, params)
 % Introduction:
-%   This function computes the net forces and moments acting on the
-%   helicopter in body axes during hover and forward flight, considering
-%   contributions from two coaxial rotors, gravity and fuselage.
+%   This function computes the aerodynamic forces and moments acting on the
+%   helicopter in body axes, considering contributions from two coaxial
+%   rotors, gravity and fuselage.
+%
+% Author:
+%   Hanchen Li (hl3422@ic.ac.uk)
 %
 % References:
 %   \bibitem{Padfield} Rotor blade element and flapping dynamics 
@@ -30,7 +33,7 @@ function [X, Y, Z, L, M, N, I_xx, I_yy, I_zz, I_xz] = FM_N(state, ctrl, params)
 %   delta_E   - Elevator deflection (rad)
 %   delta_R   - Rudder deflection (rad)
 %
-%   % params  - [h, m, g, z_R, z_HT, z_VT, x_HT, x_VT]
+%   params    - [h, m, g, z_R, z_HT, z_VT, x_HT, x_VT]
 %   h         - Altitude (m)
 %   m         - Mass (kg)
 %   g         - Acceleration of gravity (m s^-2)
