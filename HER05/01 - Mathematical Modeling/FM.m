@@ -4,6 +4,9 @@ function [X, Y, Z, L, M, N, I_xx, I_yy, I_zz, I_xz] = FM(state, ctrl, params)
 %   helicopter in body axes, considering contributions from two coaxial
 %   rotors, gravity and fuselage.
 %
+% Author:
+%   Hanchen Li (hl3422@ic.ac.uk)
+%
 % References:
 %   \bibitem{Padfield} Rotor blade element and flapping dynamics 
 %   \bibitem{Coleman}  Coaxial rotor aerodynamic research

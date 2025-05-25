@@ -1,4 +1,4 @@
-function [X, Y, Z, L, M, N, I_xx, I_yy, I_zz, I_xz] = FMB(state, ctrl, params)
+function [X, Y, Z, L, M, N, I_xx, I_yy, I_zz, I_xz] = FM_N(state, ctrl, params)
 % Introduction:
 %   This function computes the net forces and moments acting on the
 %   helicopter in body axes during hover and forward flight, considering
