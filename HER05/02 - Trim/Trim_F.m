@@ -1,12 +1,12 @@
-function cost = Trim_F(theta_LR, theta_UR, theta_ls, theta_lc, phi, theta, delta_E, delta_R)
+function cost = Trim_F(theta_LR, theta_UR, theta_1s, theta_1c, phi, theta, delta_E, delta_R)
 % Author:
 %   Hanchen Li (hl3422@ic.ac.uk)
 %
 % Inputs:
 %   theta_LR  - Lower rotor collective (rad)
 %   theta_UR  - Upper rotor collective (rad)
-%   theta_ls  - Longitudinal cyclic (rad)
-%   theta_lc  - Lateral cyclic (rad)
+%   theta_1s  - Longitudinal cyclic (rad)
+%   theta_1c  - Lateral cyclic (rad)
 %   phi       - Euler roll angle (rad)
 %   theta     - Euler pitch angle (rad)
 %   delta_E   - Elevator deflection (rad)
@@ -33,14 +33,14 @@ function cost = Trim_F(theta_LR, theta_UR, theta_ls, theta_lc, phi, theta, delta
 %   psi       - Euler yaw angle (rad)
 state = [0, 0, 0, 0, 0, 0, phi, theta, 0];
 
-%   ctrl      - [theta_LR, theta_UR, theta_ls, theta_lc, delta_E, delta_R]
+%   ctrl      - [theta_LR, theta_UR, theta_1s, theta_1c, delta_E, delta_R]
 %   theta_LR  - Lower rotor collective (rad)
 %   theta_UR  - Upper rotor collective (rad)
-%   theta_ls  - Longitudinal cyclic (rad)
-%   theta_lc  - Lateral cyclic (rad)
+%   theta_1s  - Longitudinal cyclic (rad)
+%   theta_1c  - Lateral cyclic (rad)
 %   delta_E   - Elevator deflection (rad)
 %   delta_R   - Rudder deflection (rad)
-ctrl = [theta_LR, theta_UR, theta_ls, theta_lc, delta_E, delta_R];
+ctrl = [theta_LR, theta_UR, theta_1s, theta_1c, delta_E, delta_R];
 
 %   params    - [h, m, g, z_R, z_HT, z_VT, x_HT, x_VT]
 %   h         - Altitude (m)

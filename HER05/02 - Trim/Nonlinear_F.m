@@ -6,12 +6,12 @@ function [c, ceq] = Nonlinear_F(x)
 %   Hanchen Li (hl3422@ic.ac.uk)
 %
 % Inputs:
-%   x         - (theta_LR, theta_UR, theta_ls, theta_lc, phi, theta,
+%   x         - (theta_LR, theta_UR, theta_1s, theta_1c, phi, theta,
 %               delta_E, delta_R)
 %   theta_LR  - Lower rotor collective (rad)
 %   theta_UR  - Upper rotor collective (rad)
-%   theta_ls  - Longitudinal cyclic (rad)
-%   theta_lc  - Lateral cyclic (rad)
+%   theta_1s  - Longitudinal cyclic (rad)
+%   theta_1c  - Lateral cyclic (rad)
 %   phi       - Euler roll angle (rad)
 %   theta     - Euler pitch angle (rad)
 %   delta_E   - Elevator deflection (rad)
@@ -22,11 +22,11 @@ function [c, ceq] = Nonlinear_F(x)
 %   ceq       - Equality constraint
 
 %% 0 Basic Parameters
-%   x         - (theta_LR, theta_UR, theta_ls, theta_lc, phi, theta)
+%   x         - (theta_LR, theta_UR, theta_1s, theta_1c, phi, theta)
 theta_LR  = x(1);
 theta_UR  = x(2);
-theta_ls  = x(3);
-theta_lc  = x(4);
+theta_1s  = x(3);
+theta_1c  = x(4);
 phi       = x(5);
 theta     = x(6);
 delta_E   = x(7);
@@ -44,14 +44,14 @@ delta_R   = x(8);
 %   psi       - Euler yaw angle (rad)
 state = [0, 0, 0, 0, 0, 0, phi, theta, 0];
 
-%   ctrl      - [theta_LR, theta_UR, theta_ls, theta_lc, delta_E, delta_R]
+%   ctrl      - [theta_LR, theta_UR, theta_1s, theta_1c, delta_E, delta_R]
 %   theta_LR  - Lower rotor collective (rad)
 %   theta_UR  - Upper rotor collective (rad)
-%   theta_ls  - Longitudinal cyclic (rad)
-%   theta_lc  - Lateral cyclic (rad)
+%   theta_1s  - Longitudinal cyclic (rad)
+%   theta_1c  - Lateral cyclic (rad)
 %   delta_E   - Elevator deflection (rad)
 %   delta_R   - Rudder deflection (rad)
-ctrl = [theta_LR, theta_UR, theta_ls, theta_lc, delta_E, delta_R];
+ctrl = [theta_LR, theta_UR, theta_1s, theta_1c, delta_E, delta_R];
 
 %   params    - [h, m, g, z_R, z_HT, z_VT, x_HT, x_VT]
 %   h         - Altitude (m)

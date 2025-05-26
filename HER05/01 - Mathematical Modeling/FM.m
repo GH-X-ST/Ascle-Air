@@ -28,8 +28,8 @@ function [X, Y, Z, L, M, N, I_xx, I_yy, I_zz, I_xz] = FM(state, ctrl, params)
 %   ctrl      - [theta_LR, theta_UR, theta_ls, theta_lc, delta_E, delta_R]
 %   theta_LR  - Lower rotor collective (rad)
 %   theta_UR  - Upper rotor collective (rad)
-%   theta_ls  - Longitudinal cyclic (rad)
-%   theta_lc  - Lateral cyclic (rad)
+%   theta_1s  - Longitudinal cyclic (rad)
+%   theta_1c  - Lateral cyclic (rad)
 %   delta_E   - Elevator deflection (rad)
 %   delta_R   - Rudder deflection (rad)
 %
@@ -77,11 +77,11 @@ r = state(6);
 phi = state(7);
 theta = state(8);
 psi = state(9);
-% ctrl - [theta_avg, theta_diff, theta_ls, theta_lc]
+% ctrl - [theta_avg, theta_diff, theta_1s, theta_1c]
 theta_avg = ctrl(1);
 theta_diff = ctrl(2);
-theta_ls = ctrl(3);
-theta_lc = ctrl(4);
+theta_1s = ctrl(3);
+theta_1c = ctrl(4);
 delta_E = ctrl(5);
 delta_R = ctrl(6);
 % params - [h, m, g, z_R, z_HT, z_VT, x_HT, x_VT]
