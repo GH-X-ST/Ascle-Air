@@ -6,7 +6,7 @@ function [c, ceq] = Nonlinear_H_C(x)
 %   Hanchen Li (hl3422@ic.ac.uk)
 %
 % Inputs:
-%   x         - (theta_LR, theta_UR, theta_ls, theta_lc, phi, theta)
+%   x         - (theta_LR, theta_UR, theta_1s, theta_1c, phi, theta)
 %   theta_LR  - Lower rotor collective (rad)
 %   theta_UR  - Upper rotor collective (rad)
 %   theta_1s  - Longitudinal cyclic (rad)

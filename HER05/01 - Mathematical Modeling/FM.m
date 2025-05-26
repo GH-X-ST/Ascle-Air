@@ -25,7 +25,7 @@ function [X, Y, Z, L, M, N, I_xx, I_yy, I_zz, I_xz] = FM(state, ctrl, params)
 %   theta     - Euler pitch angle (rad)
 %   psi       - Euler yaw angle (rad)
 %
-%   ctrl      - [theta_LR, theta_UR, theta_ls, theta_lc, delta_E, delta_R]
+%   ctrl      - [theta_LR, theta_UR, theta_1s, theta_1c, delta_E, delta_R]
 %   theta_LR  - Lower rotor collective (rad)
 %   theta_UR  - Upper rotor collective (rad)
 %   theta_1s  - Longitudinal cyclic (rad)
