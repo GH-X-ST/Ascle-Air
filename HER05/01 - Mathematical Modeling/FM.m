@@ -180,7 +180,7 @@ if u == 0
 
     else      % 2.2 Climb
 
-        T_UR = 0;
+        T_UR = 1;
 
     end
 
