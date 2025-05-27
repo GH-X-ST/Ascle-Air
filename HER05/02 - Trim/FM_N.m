@@ -116,8 +116,9 @@ H_UR = 0;      % Upper rotor drag (N)
 H_LR = 0;      % Lower rotor drag (N)
 Y_UR = 0;      % Upper rotor side force (N)
 Y_LR = 0;      % Lower rotor side force (N)
-Q_UR = 0;      % Upper rotor torque (+ve clockwise) (Nm)
-Q_LR = 0;      % Lower rotor torque (+ve anticlockwise) (Nm)
+Q_diff = 0;    % Q_LR - Q_UR
+% Q_UR = 0;    % Upper rotor torque (+ve clockwise) (Nm)
+% Q_LR = 0;    % Lower rotor torque (+ve anticlockwise) (Nm)
 beta1c_UR = 0; % Upper rotor longitudinal flapping
                % (+ve disk tilt fore-aft) (rad)
 beta1s_UR = 0; % Lower rotor longitudinal flapping
@@ -233,7 +234,7 @@ M = My_F + My_LR + My_UR - L_HT * l_HT + 2 * D_VT * h_VT + D_HT * h_HT ...
     + (H_UR * cos(beta1c_UR) - T_UR * sin(beta1c_UR) * cos(beta1s_UR)) * h_UR;
 
 % 7.6 N, Yawing moment
-N = Q_UR - Q_LR - L_VT * l_VT - (2 * D_VT + D_HT) * y_CG ...
+N = -Q_diff - L_VT * l_VT - (2 * D_VT + D_HT) * y_CG ...
     + ((T_LR * cos(beta1c_LR) * sin(beta1s_LR) ...
     + T_UR * cos(beta1c_UR) * sin(beta1s_UR)) ...
     - (Y_LR * cos(beta1s_LR) + Y_UR * cos(beta1s_UR))) * x_CG ...
