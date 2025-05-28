@@ -55,8 +55,7 @@ ctrl = [theta_LR, theta_UR, theta_1s, theta_1c, delta_E, delta_R];
 %               aerodynamic centre to shaft (m)
 %   x_VT      - Horizontal distance from vertical tailplane
 %               aerodynamic centre to shaft (m)
-params = [0, 600, 9.80665, 0, 0, 0, 0, 0];
-
+params = [1524, 600, 9.80665, 1, 0, 0, 0, 0];
 
 %% 1 Calling function
 [X, Y, Z, L, M, N, ~, ~, ~, ~] = FM_N(state, ctrl, params);
