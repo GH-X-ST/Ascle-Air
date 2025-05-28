@@ -194,6 +194,11 @@ end
 %% 5 Fuselage Aerodynamic Model
 
 %% 6 Empennage Aerodynamic Model
+% 6.1 Horizontal tailplane
+[L_HT, D_HT] = FHT(u, v, w, rho, delta_E);
+
+% 6.1 Vertical tailplane
+[L_VT, D_VT] = FVT(u, v, w, rho, delta_R);
 
 %% 7 Forces and Moments
 % 7.1 X, Logitudinal Force
