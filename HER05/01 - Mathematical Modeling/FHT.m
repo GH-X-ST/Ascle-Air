@@ -4,7 +4,7 @@ function [LHT,DHT] = FHT(u,v,w,rho,delE)
 % Drag positive backwards
 % positive u in forward flight
 % positive v while drifting right
-% positive w while climbing
+% negative w while climbing
 % del E positive when airfoil points up (pitch down)
 
 TBD = 0.2; % Tail Boom Diametre
@@ -16,7 +16,7 @@ cutout = VTl*sind(20); %Loss in elevator width due to cutout of angle in degrees
 
 Area = HTl*(HTw-2*TBD-2*cutout);
 
-alpha = -atand(w/u)+rad2deg(delE);
+alpha = atand(-w/u)+rad2deg(delE);
 
 [CL,CD] = NACA0015(alpha);
 LHT = CL*0.5*rho*u^2*Area;

@@ -4,7 +4,7 @@ function [LVT,DVT] = FVT(u,v,w,rho,delR)
 % Drag positive backwards
 % positive u in forward flight
 % positive v while drifting right
-% positive w while climbing
+% negative w while climbing
 % del R positive when airfoil points right (yaw left)
 
 HTl = 0.9; % Horizontail Tail length (airfoil chord length)

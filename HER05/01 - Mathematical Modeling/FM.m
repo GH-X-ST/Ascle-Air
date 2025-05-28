@@ -174,18 +174,15 @@ l_HT = x_CG + x_HT;
 
 %% 4 Rotor Aerodynamic Model
 if u == 0
+    
+    % 4.1 Hover and climb
+    
+    T_UR = 0;
 
-    if w == 0 % 2.1 Hover
 
-        T_UR = 0;
-
-    else      % 2.2 Climb
-
-        T_UR = 1;
-
-    end
-
-else          % 1.3 Forward flight
+else
+    
+    % 4.2 Forward flight
 
     T_UR = 0;
 
