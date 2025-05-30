@@ -22,6 +22,4 @@ alpha = atand(-w/u)+rad2deg(delE);
 LHT = CL*0.5*rho*u^2*Area;
 DHT = CD*0.5*rho*u^2*Area;
 
-
-
 end
