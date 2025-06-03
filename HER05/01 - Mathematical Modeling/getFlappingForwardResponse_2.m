@@ -1,8 +1,11 @@
-function [Beta, Beta_dot] = getFlappingForwardResponse(Vx, e, CT, theta0_u_rad, theta0_l_rad, theta_1s_rad, theta_1c_rad, rotor)
+function [Beta, Beta_dot] = getFlappingForwardResponse(Vx,e,CT,theta0_deg,theta_tw_deg,theta_1c_deg,theta_1s_deg,rotor)
 
-% All output beta angles are radians
+    % All output beta angles are radians !!
+    % All input theta angles are degrees !!
+   
 
-% ===== Physical parameters =====
+    
+    % ===== Physical parameters =====
 
 Cl_alpha = 6.2305;         % Lift curve slope (1/rad)
 
@@ -13,12 +16,12 @@ constants = getConstants();  % or use setupConstants() directly if you prefer
 GTOW    = constants.GTOW;      % kg
 Nb      = constants.Nb;
 AR      = constants.AR;
-V_tip   = constants.Vtip;      % m/s
+V_tip    = constants.Vtip;      % m/s
 R       = constants.R;         % m
 r_0     = constants.r0;        % ND root cutout
 A       = constants.A;         % m^2
 Ae      = constants.Ae;        % m^2 (effective area)
-c       = constants.cbar;      % mean chord
+c    = constants.cbar;      % mean chord
 Cd0     = constants.Cd0;       % profile drag coefficient
 sigma_e = constants.sigma_e;   % thrust-weighted equivalent solidity
 rho     = constants.rho;       % kg/m^3
@@ -27,12 +30,24 @@ Cd_f    = constants.Cd_f;      % fuselage drag coeff
 S_f     = constants.S_f;       % fuselage frontal area
 Omega   = constants.Omega;     % angular speed
 
+
+% theta0 & theta_twist values
+
+theta0_rad = theta0_deg * (pi/180);  % in radian
+theta_tw_rad = theta_tw_deg * (pi/180); % in radian
+
+% theta_1s & theta_1c values 
+theta_1s_rad = theta_1s_deg * (pi/180); % in radian
+
+theta_1c_rad = theta_1c_deg * (pi/180); % in radian
+
 % Flexbeam parameters (from structure team)
 
 b = 0.2;
 L = 0.14* 5.3;
 H = 0.06* 5.3;
 h = 0.025;
+
 
 yield_strength = 680e6;
 
@@ -103,7 +118,10 @@ beta_p_rad = deg2rad(beta_p_deg);
 
 if rotor == "upper"
 
-    theta_tw_u_rad = constants.theta_tw_u;
+    theta0_u = 11.61; % from BEMT
+    theta0_u_rad = deg2rad(theta0_u);
+    theta_tw_u = -11;
+    theta_tw_u_rad = deg2rad(theta_tw_u);
 
     beta0_rad = (gamma/(nu_flap^2)) * ((theta0_u_rad/8)*(1+mu^2) + (theta_tw_u_rad/10)*(1+(5/6)*mu^2) + (mu/6)*theta_1s_rad - (CT/(12*mu))) + k_beta*beta_p_rad/(Ib*Omega^2*nu_flap^2);
     
@@ -123,9 +141,16 @@ if rotor == "upper"
     beta_1s_rad = double(sol.y1);
 
 
+
 elseif rotor == "lower"
     
-    theta_tw_l_rad = constants.theta_tw_l;
+    theta0_l = 7.82; 
+    theta0_l_rad = deg2rad(theta0_l);
+    theta_tw_l = -6;
+    theta_tw_l_rad = deg2rad(theta_tw_l);
+    
+    
+    
     
     beta0_rad = (gamma/(nu_flap^2)) * ((theta0_l_rad/8)*(1+mu^2) + (theta_tw_l_rad/10)*(1+(5/6)*mu^2) + (mu/6)*theta_1s_rad - (CT/(12*mu))) + k_beta*beta_p_rad/(Ib*Omega^2*nu_flap^2);
     

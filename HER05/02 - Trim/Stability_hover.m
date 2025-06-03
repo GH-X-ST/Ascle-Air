@@ -1,11 +1,11 @@
-function [T_u, T_l, Cp_j, Cp_j_l, theta_0_u, theta_0_l] = Stability_hover(u, v, w, rho_input, m_input, g_input, polar)
+function [T_u, T_l, Ct_u, Ct_l, Cp_j, Cp_j_l, theta_0_u, theta_0_l] = Stability_hover(u, v, w, rho_input, m_input, g_input, polar)
 
 % Get all constants
 constants = getConstants();  % or use setupConstants() directly if you prefer
 
 % Access individual constants using dot notation
-% GTOW    = constants.GTOW;      % kg
-GTOW    = m_input;
+% GTOW    = constants.GTOW;    % kg
+GTOW    = m_input;             % kg
 Nb      = constants.Nb;
 AR      = constants.AR;
 Vtip    = constants.Vtip;      % m/s
@@ -24,11 +24,10 @@ Omega   = constants.Omega;
 % addpath('Airfoil');
 % polar = loadPolarData('xf-rc410-il-1000000.txt');
 
-
 % Parameter Input
-theta_tw_u = -11; % root to tip, degree
+theta_tw_u = rad2deg(constants.theta_tw_u); % root to tip, degree
 theta_tw_u = theta_tw_u/R*pi/180*R;
-theta_tw_l = -6;
+theta_tw_l = rad2deg(constants.theta_tw_l);
 theta_tw_l = theta_tw_l/R*pi/180*R;
 
 TR_u = 1;
@@ -149,7 +148,7 @@ while abs(eps) > tol
         dCl_j(j) = Cl_alpha*(pitch_j - phi - AoA_zl);
 
         dCt_j4(j) = Nb*0.5*rho*U^2*c_u(r(j))*Cl*dr*R/(rho_input*Ae*Vtip^2);
-        dT_j(j) = dCt_j4(j)*(rho_input*Ae*Vtip^2);
+        dT_j(j) = dCt_j2(j)*(rho_input*Ae*Vtip^2);
 
         dCp_j(j) = dCt_j3(j)*lambda_j(j);
 
@@ -190,6 +189,8 @@ while abs(eps) > tol
     record(count) = theta_0_u;
     count = count+1;
 end
+
+Ct_u = Ct_j;
 
 % --------------- LOW ROTOR ------------------- %
 % Equal thrust sharing
@@ -280,7 +281,7 @@ while abs(eps_l) > tol
         dCl_j_l(j) = Cl_alpha*(pitch_j - phi - AoA_zl);
 
         dCt_j2_l(j) = Nb*0.5*rho*U^2*c_l(r(j))*Cl*dr*R/(rho*Ae*Vtip^2);
-        dT_j_l(j) = dCt_j2_l(j)*(rho*Ae*Vtip^2);
+        dT_j_l(j) = dCt_j_l(j)*(rho*Ae*Vtip^2);
 
         % incremental power
         dCp_j_l(j) = dCt_j_l(j)*lambda_j_l(j);
@@ -321,7 +322,7 @@ while abs(eps_l) > tol
     record(count) = theta_0_l;
     count = count+1;
 end
-
+Ct_l = Ct_j_l;
 % theta_0_l = theta_0_l*180/pi;
 
 
@@ -332,4 +333,5 @@ Cp_ideal = sum(Cp_induced_j + Cp_induced_j_l);
 Cp_profile = sum(Cp_profile_j + Cp_profile_j_l);
 FM = Cp_ideal/(k_int*k*Cp_ideal + Cp_profile);
 
-end
+
+

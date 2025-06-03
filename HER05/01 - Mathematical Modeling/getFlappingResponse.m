@@ -1,4 +1,4 @@
-function [Beta, Beta_dot] = getFlappingForwardResponse(Vx, e, CT, theta0_u_rad, theta0_l_rad, theta_1s_rad, theta_1c_rad, rotor)
+function [beta_1c_rad, beta_1s_rad] = getFlappingResponse(Vx, CT, theta0_u_rad, theta0_l_rad, theta_1s_rad, theta_1c_rad, rotor)
 
 % All output beta angles are radians
 
@@ -10,6 +10,7 @@ Cl_alpha = 6.2305;         % Lift curve slope (1/rad)
 constants = getConstants();  % or use setupConstants() directly if you prefer
 
 % Access individual constants using dot notation
+e       = constants.e;
 GTOW    = constants.GTOW;      % kg
 Nb      = constants.Nb;
 AR      = constants.AR;

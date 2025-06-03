@@ -178,23 +178,23 @@ l_HT = x_CG + x_HT;
 addpath('Airfoil');
 polar = loadPolarData('xf-rc410-il-1000000.txt');
 
-if u == 0
+if abs(u) < 1e-4
     
     % 4.2 Hover and climb aerodynamics
 
-    [T_UR, T_LR, ~, ~, ~, ~] = Stability_hover_getT(u, v, w, rho, m, g, polar, theta_UR, theta_LR);
+    [T_UR, T_LR, CT_UR, CT_LR, ~, ~] = Stability_hover_getT(u, v, w, rho, m, g, polar, theta_UR, theta_LR);
 
     % 4.3 Hover and climb flight dynamics
-    % It will return empty value as u = 0
 
-    % [beta1c_UR, beta1s_UR] = getFlappingResponse(u, CT_UR, theta_UR, theta_LR, theta_1s, theta_1c, 'upper');
-    % [beta1c_LR, beta1s_LR] = getFlappingResponse(u, CT_LR, theta_UR, theta_LR, theta_1s, theta_1c, 'lower');
+    [beta1c_UR, beta1s_UR] = getFlappingForwardResponse(u, CT_UR, theta_UR, theta0_l_rad, theta_1s_rad, theta_1c_rad, rotor);
 
 else
     
     % 4.4 Forward flight aerodynamics
 
     [T_u, T_l, H_u, H_l, Y_u, Y_l, Q_u, Q_l, Mx_u, My_u, Mx_l, My_l, Cq_i_u, Cq_i_l, theta_0_u, theta_0_l] = Stability_forward(u, v, w, rho_input, polar);
+
+    [T_UR, T_LR, H_UR, H_LR, Y_UR, Y_LR, Q_UR, Q_LR, Mx_UR, My_UR, Mx_LR, My_LR, ~, ~, theta_UR, theta_LR] = Stability_forward(u, v, w, rho, m, g, polar);
 
     Q_UR = -Q_UR; % to reaction torque
 

@@ -4,8 +4,8 @@ function [T, H, Y, Q, Mx, My, Cq_i, theta_0_u] = Stability_forward_upper(u, v, w
 constants = getConstants();  % or use setupConstants() directly if you prefer
 
 % Access individual constants using dot notation
-% GTOW    = constants.GTOW;      % kg
-GTOW    = m_input;
+% GTOW    = constants.GTOW;    % kg
+GTOW    = m_input;             % kg
 Nb      = constants.Nb;
 AR      = constants.AR;
 Vtip    = constants.Vtip;      % m/s
@@ -22,10 +22,14 @@ Cd_f    = constants.Cd_f;      % fuselage drag coeff
 S_f     = constants.S_f;       % fuselage frontal area
 Omega   = constants.Omega;     % angular speed
 
+e = constants.e; % flapping hinge
+theta_1c = constants.theta_1c; % deg;
+theta_1s = constants.theta_1s; %  deg;  
+
 % addpath('Airfoil');
 % polar = loadPolarData('xf-rc410-il-1000000.txt');
 
-theta_tw_u=-11;
+theta_tw_u=rad2deg(constants.theta_tw_u);
 TR_u = 1;
 v = 0;
 Vc=w;
@@ -139,10 +143,7 @@ while abs(eps) > tol
 
     % flapping respons - at 140 knots, 
     % assuming e = 0.1; theta_1s_deg = -3; % from paper -- flight test; theta_1c_deg = 0.2; % from paper -- flight test
-    e = 0.1; % flapping hinge
-    theta_1c = 0.2; % deg;
-    theta_1s = -3; %  deg;   
-    [beta,beta_dot] = getFlappingForwardResponse(e,Ct_u_req,theta_0_u*180/pi,theta_tw_u*180/pi,theta_1c,theta_1s); % inputs are degree
+    [beta,beta_dot] = getFlappingForwardResponse(Vx, e,Ct_u_req,theta_0_u*180/pi,theta_tw_u*180/pi,theta_1c,theta_1s, 'upper'); % inputs are degree
 
     % at each discretised azimuth location dpsi
     for i = 1:length(azimuth)
