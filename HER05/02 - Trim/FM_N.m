@@ -77,9 +77,9 @@ r = state(6);
 phi = state(7);
 theta = state(8);
 psi = state(9);
-% ctrl - [theta_avg, theta_diff, theta_1s, theta_1c]
-theta_avg = ctrl(1);
-theta_diff = ctrl(2);
+% ctrl - [theta_LR, theta_UR, theta_1s, theta_1c, delta_E, delta_R]
+theta_LR = ctrl(1);
+theta_UR = ctrl(2);
 theta_1s = ctrl(3);
 theta_1c = ctrl(4);
 delta_E = ctrl(5);
@@ -173,6 +173,9 @@ l_HT = x_CG + x_HT;
 %% 3 System & Structure Model
 
 %% 4 Rotor Aerodynamic Model
+
+
+
 if u == 0
     
     % 4.1 Hover and climb
@@ -200,7 +203,8 @@ end
 
 %% 7 Forces and Moments
 % 7.1 X, Logitudinal Force
-X = -m * g * sin(theta) - D * cos(alpha_s) - 2 * D_VT - D_HT ...
+X = -m * g * sin(theta) ...
+    - D * cos(alpha_s) - L * sin(alpha_s) - 2 * D_VT - D_HT ...
     - (H_LR * cos(beta1c_LR) + H_UR * cos(beta1c_UR)) ...
     + (T_LR * sin(beta1c_LR) * cos(beta1s_LR) ...
     + T_UR * sin(beta1c_UR) * cos(beta1s_UR));
@@ -212,7 +216,8 @@ Y = m * g * sin(phi) * cos(theta) + Y_F - 2 * L_VT ...
     + T_UR * cos(beta1c_UR) * sin(beta1s_UR));
 
 % 7.3 Z, Lateral Force
-Z = m * g * cos(phi) * cos(theta) + D * sin(alpha_s) - L_HT ...
+Z = m * g * cos(phi) * cos(theta) ...
+    + D * sin(alpha_s) - L * cos(alpha_s) - L_HT ...
     - (H_LR * sin(beta1c_LR) + H_UR * sin(beta1c_UR)) ...
     - (Y_LR * sin(beta1s_LR) + Y_UR * sin(beta1s_UR)) ...
     - (T_LR * cos(beta1c_LR) * cos(beta1s_LR) ...

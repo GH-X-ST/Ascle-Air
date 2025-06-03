@@ -77,9 +77,9 @@ r = state(6);
 phi = state(7);
 theta = state(8);
 psi = state(9);
-% ctrl - [theta_avg, theta_diff, theta_1s, theta_1c]
-theta_avg = ctrl(1);
-theta_diff = ctrl(2);
+% ctrl - [theta_LR, theta_UR, theta_1s, theta_1c, delta_E, delta_R]
+theta_LR = ctrl(1);
+theta_UR = ctrl(2);
 theta_1s = ctrl(3);
 theta_1c = ctrl(4);
 delta_E = ctrl(5);
@@ -172,25 +172,45 @@ l_HT = x_CG + x_HT;
 
 %% 3 System & Structure Model
 
-%% 4 Rotor Aerodynamic Model
-if u == 0
+%% 4 Rotor Aerodynamics & Dynamics Model
+
+% load airfoil data
+addpath('Airfoil');
+polar = loadPolarData('xf-rc410-il-1000000.txt');
+
+
+if abs(u) < 1e-4
     
-    % 4.1 Hover and climb
+    % 4.1 Hover and climb aerodynamics
     
-    T_UR = 0;
+    [T_UR, T_LR, ~, ~, theta_UR, theta_LR] = Stability_hover(u, v, w, rho, m, g, polar);
 
 
 else
     
-    % 4.2 Forward flight
+    % 4.2 Forward flight aerodynamics
 
-    T_UR = 0;
+    [T_UR, T_LR, H_UR, H_LR, Y_UR, Y_LR, Q_UR, Q_LR, Mx_UR, My_UR, Mx_LR, My_LR, ~, ~, theta_UR, theta_LR] = Stability_forward(u, v, w, rho, m, g, polar);
+
+    Q_UR = -Q_UR; % to reaction torque
+
+    Q_LR = -Q_LR; % to reaction torque
+
+    % 4.3 Forward flight dynamics
+
+    e = 0; % TBD
+
+    % Upper rotor
+
+    [beta_1c_rad, beta_1s_rad] = getFlappingForwardResponse(e,CT,theta0_deg,theta_tw_deg,theta_1c_deg,theta_1s_deg)
+
+    % Lower rotor
 
 end
 
-%% 5 Fuselage Aerodynamic Model
+%% 5 Fuselage Aerodynamics Model
 
-%% 6 Empennage Aerodynamic Model
+%% 6 Empennage Aerodynamics Model
 % 6.1 Horizontal tailplane
 [L_HT, D_HT] = FHT(u, v, w, rho, delta_E);
 
@@ -199,7 +219,7 @@ end
 
 %% 7 Forces and Moments
 % 7.1 X, Logitudinal Force
-X = -D * cos(alpha_s) - 2 * D_VT - D_HT ...
+X = -D * cos(alpha_s) - L * sin(alpha_s) - 2 * D_VT - D_HT ...
     - (H_LR * cos(beta1c_LR) + H_UR * cos(beta1c_UR)) ...
     + (T_LR * sin(beta1c_LR) * cos(beta1s_LR) ...
     + T_UR * sin(beta1c_UR) * cos(beta1s_UR));
@@ -211,7 +231,7 @@ Y = Y_F - 2 * L_VT ...
     + T_UR * cos(beta1c_UR) * sin(beta1s_UR));
 
 % 7.3 Z, Lateral Force
-Z = D * sin(alpha_s) - L_HT ...
+Z = D * sin(alpha_s) - L * cos(alpha_s) - L_HT ...
     - (H_LR * sin(beta1c_LR) + H_UR * sin(beta1c_UR)) ...
     - (Y_LR * sin(beta1s_LR) + Y_UR * sin(beta1s_UR)) ...
     - (T_LR * cos(beta1c_LR) * cos(beta1s_LR) ...
@@ -236,7 +256,7 @@ M = My_F + My_LR + My_UR - L_HT * l_HT + 2 * D_VT * h_VT + D_HT * h_HT ...
     + (H_UR * cos(beta1c_UR) - T_UR * sin(beta1c_UR) * cos(beta1s_UR)) * h_UR;
 
 % 7.6 N, Yawing moment
-N = -Q_diff - L_VT * l_VT - (2 * D_VT + D_HT) * y_CG ...
+N = Q_UR - Q_LR - L_VT * l_VT - (2 * D_VT + D_HT) * y_CG ...
     + ((T_LR * cos(beta1c_LR) * sin(beta1s_LR) ...
     + T_UR * cos(beta1c_UR) * sin(beta1s_UR)) ...
     - (Y_LR * cos(beta1s_LR) + Y_UR * cos(beta1s_UR))) * x_CG ...
