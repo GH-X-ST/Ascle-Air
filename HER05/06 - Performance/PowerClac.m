@@ -1,4 +1,4 @@
-function output = PowerClac(Weight,h,T,alp ,V_forward,input)
+function output = PowerClac(Weight,h,T ,V_forward,input)
 
 
 omega = input(1);
@@ -21,37 +21,61 @@ M_dd = input(17);
 kappa_trans = input(18);
 ISA_factor = input(19);
 T_trans = input(20);
+Cl_alpha = input(21);
+twist_upper = input(22);
+twist_lower = input(23);
+picth_upper = input(24);
+pitch_lower = input(25);
+picth_upper_hover = input(26);
+pitch_lower_hover = input(27);
+CT_upper = input(28);
+CT_lower = input(29);
+h_cruise = input(30);
+
 mu = V_forward ./ (omega * R);
+V_tip = omega*R;
+
+Nmax = 2000;
+tol = 5e-4;
+
+
 
 if ISA_factor == 1
     T1_T2 = ((15 - 0.001981 * h) + T_trans) / ((35 - 1.981 * h * 10^-3) + T_trans);
     T = T + 20;
+    alp = atan(((0.5*rho_0*(1-6.876*10^-6*h)^4.265*T1_T2*f).* V_forward.^2) ./ Weight);
 else
     T1_T2 = 1;
+    alp = atan(((0.5*rho_0*(1-6.876*10^-6*h)^4.265*f).* V_forward.^2) ./ Weight);
 end
 
-% Pi clac
-CT = Weight/(2*rho_0*(1-6.876*10^-6*h)^4.265*T1_T2*A*omega^2*R^2);
-lambda_initial = sqrt(CT/2);
-lambda_n = lambda_initial;
-lambda = zeros(size(V_forward));
-for j = 1:length(V_forward)
-    for i = 1:100
-        lambda_n1 = mu(j)*tan(alp(j)) + CT / (2*sqrt(mu(j)^2 + lambda_n^2));
-        lambda_n = lambda_n1;
-    end
-    lambda(j) = lambda_n1;
+
+Thrust = (Weight / 2) .* cos(alp);
+
+%%% Pi clac
+% upper rotor
+CT = Thrust./(rho_0*(1-6.876*10^-6*h)^4.265*T1_T2*A*omega^2*R^2);
+
+lambdai = sqrt(CT./2); % λ₀ (hover value)
+
+
+for n = 1:Nmax
+    lambda_new = mu .* tan(alp) + CT ./ ( 2 .* sqrt( mu.^2 + lambdai.^2 ) );
+
+if all( abs(lambda_new - lambdai) ./ lambda_new < tol )
+lambdai = lambda_new; % converged – keep the final value
+break
 end
+
+lambdai = lambda_new; % next iteration
+end
+
 kappa_i = kappa_ii .* cosh(7.5 .* mu.^2);
-Pi = (kappa_int * Weight/2 * omega * R * 2) .* lambda .* kappa_i;
+Pi = (kappa_int * Thrust * omega * R * 2) .* cos(alp) .* lambdai .* kappa_i;
 
 
 Cpp = (0.5 * f / A) .* mu.^3;
 Pp = Cpp .* (rho_0*(1-6.876*10^-6*h)^4.265*T1_T2 * A * omega^3 * R^3);
-
-
-
-Pc = 0.3 * Weight *ones(size(V_forward));
 
 
 Paux = Paux_total *ones(size(V_forward));
@@ -84,8 +108,8 @@ for i = 1:length(V_forward)
 end
 Po = (Cpo_pure+delta_Cpo) .* (2 * A * omega^3 * R^3 * rho_0*(1-6.876*10^-6*h_M)^4.265 *T1_T2);
 
+
 PPP = (Pi + Po + Pp + Paux) .* kappa_trans;
 
-
-output = PPP;
+output = [Pi;Po;Pp;Paux;PPP;lambdai;Cpo_pure+delta_Cpo];
 end

@@ -32,25 +32,12 @@ Omega   = constants.Omega;     % angular speed
 theta_tw_u_rad = constants.theta_tw_u;
 theta_tw_l_rad = constants.theta_tw_l;
 
-
-
-% theta0 & theta_twist values
-
-% theta0_rad = theta0_deg * (pi/180);  % in radian
-% theta_tw_rad = theta_tw_deg * (pi/180); % in radian
-
-% theta_1s & theta_1c values 
-% theta_1s_rad = theta_1s_deg * (pi/180); % in radian
-
-% theta_1c_rad = theta_1c_deg * (pi/180); % in radian
-
 % Flexbeam parameters (from structure team)
 
 b = 0.2;
 L = 0.14* 5.3;
 H = 0.06* 5.3;
 h = 0.025;
-
 
 yield_strength = 680e6;
 
@@ -76,7 +63,6 @@ Ix2 = Ix2_local + A2 * d^2;
 Ix = Ix1 + Ix2;
 Iy = Iy1 + Iy2;
 
-
 k_beta =(3*E1*Ix)/(0.14*R);
 
 m = 8.88;            % Uniform mass distribution (kg/m) --- based on blade material
@@ -96,76 +82,66 @@ mu = V_forward / V_tip;      % advance ratio
 beta_p_deg = 2.5;  % Pre-cone angle in deg
 beta_p_rad = deg2rad(beta_p_deg);
 
+
+% === Lambda ===
+lambda = sqrt(0.5*CT + 0.25*mu.^2 ) - 0.5*mu;
+
 % 
-% % Get outputs
-% beta0_rad = (gamma/(nu_flap^2)) * ((theta0_rad/8)*(1+mu^2) + (theta_tw_rad/10)*(1+(5/6)*mu^2) + (mu/6)*theta_1s_rad - (CT/(12*mu)));
-% 
-% % x = beta_1c, y = beta_1s
-% syms x y
-% 
-% eq1 = y == (gamma/(nu_flap^2 - 1)) * ((1/8)*(theta_1s_rad + x)*(1 - 0.5*mu^2) + mu*theta0_rad/3 - CT/8 + mu^2*theta_1s_rad/4 + mu*theta_tw_rad/4);
-% 
-% eq2 = x == (gamma/(nu_flap^2 - 1)) * ((1/8)*(theta_1c_rad - y)*(1 + 0.5*mu^2) - mu*beta0_rad/6);
-% 
-% 
-% sol = solve([eq1, eq2], [x, y]);
-% 
-% beta_1c_rad = double(sol.x);
-% 
-% beta_1s_rad = double(sol.y);
-% 
-% 
-% Beta = @(psi) beta0_rad + beta_1c_rad*cos(psi) + beta_1s_rad*sin(psi);
-% 
-% Beta_dot = @(psi) (-beta_1c_rad*sin(psi) + beta_1s_rad*cos(psi))*Omega;
 
 if rotor == "upper"
 
-    % theta0_u = 11.61; % from BEMT
-    % theta0_u_rad = deg2rad(theta0_u);
-    % theta_tw_u = -11;
-    % theta_tw_u_rad = deg2rad(theta_tw_u);
+    beta0_rad = (gamma/nu_flap^2) * ...
+            ( theta0_u_rad/8 * (1+mu^2) ...
+            + theta_tw_u_rad/10 * (1+5*mu^2/6) ...
+            + mu/6 * theta_1s_rad ...
+            - lambda/6 ) ...
+            + k_beta * beta_p_rad /(Ib*Omega^2*nu_flap^2);
 
-    beta0_rad = (gamma/(nu_flap^2)) * ((theta0_u_rad/8)*(1+mu^2) + (theta_tw_u_rad/10)*(1+(5/6)*mu^2) + (mu/6)*theta_1s_rad - (CT/(12*mu))) + k_beta*beta_p_rad/(Ib*Omega^2*nu_flap^2);
-    
-    % x = beta_1c, y = beta_1s
-    syms x1 y1
-    
-    eq1 = y1 == (gamma/(nu_flap^2 - 1)) * ((1/8)*(theta_1s_rad + x1)*(1 - 0.5*mu^2) + mu*theta0_u_rad/3 - CT/8 + mu^2*theta_1s_rad/4 + mu*theta_tw_u_rad/4);
-    
-    eq2 = x1 == (gamma/(nu_flap^2 - 1)) * ((1/8)*(theta_1c_rad - y1)*(1 + 0.5*mu^2) - mu*beta0_rad/6);
-    
-    sol = solve([eq1, eq2], [x1, y1]);
-    
-    beta_1c_rad = double(sol.x1);
-   
-    beta_1s_rad = double(sol.y1);
+    eqs = @(X) [
+    X(2) - (gamma/(nu_flap^2-1))*...
+           ( 1/8*(theta_1s_rad + X(1))*(1-0.5*mu^2) ...
+           + mu*theta0_u_rad/3 ...
+           - mu*lambda/4 ...
+           + mu^2*theta_1s_rad/4 ...
+           + mu*theta_tw_u_rad/4 );
+    X(1) - (gamma/(nu_flap^2-1))*...
+           ( 1/8*(theta_1c_rad - X(2))*(1+0.5*mu^2) ...
+           - mu*beta0_rad/6 );
+           ];
 
+    opts = optimoptions('fsolve', 'Display', 'off'); 
 
+    sol = fsolve(eqs, [0 0], opts);  % Initial guess
+    beta_1c_rad = sol(1);
+    beta_1s_rad = sol(2);
 
 elseif rotor == "lower"
     
-    % theta0_l = 7.82; 
-    % theta0_l_rad = deg2rad(theta0_l);
-    % theta_tw_l = -6;
-    % theta_tw_l_rad = deg2rad(theta_tw_l);
+    beta0_rad = (gamma/nu_flap^2) * ...
+            ( theta0_l_rad/8 * (1+mu^2) ...
+            + theta_tw_l_rad/10 * (1+5*mu^2/6) ...
+            + mu/6 * theta_1s_rad ...
+            - lambda/6 ) ...
+            + k_beta * beta_p_rad /(Ib*Omega^2*nu_flap^2);
+
+    eqs = @(X) [
+    X(2) - (gamma/(nu_flap^2-1))*...
+           ( 1/8*(theta_1s_rad + X(1))*(1-0.5*mu^2) ...
+           + mu*theta0_l_rad/3 ...
+           - mu*lambda/4 ...
+           + mu^2*theta_1s_rad/4 ...
+           + mu*theta_tw_l_rad/4 );
+    X(1) - (gamma/(nu_flap^2-1))*...
+           ( 1/8*(theta_1c_rad - X(2))*(1+0.5*mu^2) ...
+           - mu*beta0_rad/6 );
+           ];
+
     
-    beta0_rad = (gamma/(nu_flap^2)) * ((theta0_l_rad/8)*(1+mu^2) + (theta_tw_l_rad/10)*(1+(5/6)*mu^2) + (mu/6)*theta_1s_rad - (CT/(12*mu))) + k_beta*beta_p_rad/(Ib*Omega^2*nu_flap^2);
-    
-    
-    % x = beta_1c, y = beta_1s
-    syms x2 y2
-    
-    eq1 = y2 == (gamma/(nu_flap^2 - 1)) * ((1/8)*(theta_1s_rad + x2)*(1 - 0.5*mu^2) + mu*theta0_l_rad/3 - CT/8 + mu^2*theta_1s_rad/4 + mu*theta_tw_l_rad/4);
-    
-    eq2 = x2 == (gamma/(nu_flap^2 - 1)) * ((1/8)*(theta_1c_rad - y2)*(1 + 0.5*mu^2) - mu*beta0_rad/6);
-    
-    
-    sol = solve([eq1, eq2], [x2, y2]);
-    
-    beta_1c_rad = double(sol.x2);
-    
-    beta_1s_rad = double(sol.y2);
+    opts = optimoptions('fsolve', 'Display', 'off'); 
+
+    sol = fsolve(eqs, [0 0], opts);  % Initial guess
+    beta_1c_rad = sol(1);
+    beta_1s_rad = sol(2);
    
 end
 

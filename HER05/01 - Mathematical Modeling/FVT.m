@@ -14,10 +14,10 @@ VTw = 1; % Vertical Tail width (top to bottom length)
 
 Area = VTl*VTw;
 
-alpha = atand(v/u)+rad2deg(delR);
+alpha = atan2d( v , u ) + rad2deg(delR);   % safe in all quadrants
 
 [CL,CD] = NACA0015(alpha);
-LVT = CL*0.5*rho*u^2*Area;
-DVT = CD*0.5*rho*u^2*Area;
+LVT = CL*0.5*rho*(u^2+v^2+w^2)*Area;
+DVT = CD*0.5*rho*(u^2+v^2+w^2)*Area;
 
 end

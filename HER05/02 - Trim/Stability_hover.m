@@ -1,4 +1,4 @@
-function [T_u, T_l, Ct_u, Ct_l, Cp_j, Cp_j_l, theta_0_u, theta_0_l] = Stability_hover(u, v, w, rho_input, m_input, g_input, polar)
+function [T_u, T_l, Ct_u, Ct_l, Cp_j, Cp_j_l, theta_0_u, theta_0_l] = Stability_hover(u, v, w, a_input, rho_input, mu_input, m_input, g_input, polar)
 
 % Get all constants
 constants = getConstants();  % or use setupConstants() directly if you prefer
@@ -112,7 +112,7 @@ while abs(eps) > tol
         % U_p(i,j) = U_P;
         % U_R = mu_x*Vtip*cos(psi);
         U = sqrt(U_T^2 + U_P^2);
-        Mach(j) = U/334.3;
+        Mach(j) = U/a_input;
 
         % Prandlt tip loss
         phi = atan((lambda_c + lambda_induced_j)/r(j));
@@ -239,7 +239,7 @@ while abs(eps_l) > tol
         % U_p(i,j) = U_P;
         % U_R = mu_x*Vtip*cos(psi);
         U = sqrt(U_T^2 + U_P^2);
-        Mach(j) = U/334.3;
+        Mach(j) = U/a_input;
 
         % compressibility correction
         Cl_alpha = Cl_alpha0/sqrt(1-Mach(j)^2);

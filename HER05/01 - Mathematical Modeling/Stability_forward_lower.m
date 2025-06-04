@@ -1,4 +1,6 @@
-function [T, H, Y, Q, Mx, My, Cq_i, beta1c_LR, beta1s_LR] = Stability_forward_lower(u, v, w, rho_input, m_input, g_input, polar, theta_0_l, theta_0_u, theta_1c, theta_1s)
+function [T, H, Y, Q, Mx, My, Cq_i, beta1c_LR, beta1s_LR] = Stability_forward_lower(u, v, w, a_input, rho_input, mu_input, m_input, g_input, polar, theta_0_l, theta_0_u, theta_1c, theta_1s)
+
+% all pitch inputs (theta_0_u, theta_0_l, theta_1c, theta_1s) are RADIANS
 
 % noted that theta_0_u (here) = theta_0_l (in actual)
 % and theta_0_l (here) = theta_0_u (in actual)
@@ -35,7 +37,7 @@ Omega   = constants.Omega;     % angular speed
 % addpath('Airfoil');
 % polar = loadPolarData('xf-rc410-il-1000000.txt');
 
-theta_tw_u = rad2deg(constants.theta_tw_l); % too lazy to change the naming to lower so here is lower rotor
+theta_tw_u = constants.theta_tw_l; % too lazy to change the naming to lower so here is lower rotor
 TR_u = 1;
 % v  = 0;
 Vc = w;
@@ -43,8 +45,8 @@ Vx = u;
 Cw = (g_input*GTOW/(rho_input*Ae*Vtip^2));
 
 % Parameter Input
-theta_tw_u = theta_tw_u/R*pi/180*R;
-theta_0_u = theta_0_u * pi/180;
+% theta_tw_u = theta_tw_u/R*pi/180*R;
+% theta_0_u = theta_0_u * pi/180;
 
 % BladeGeometryInput = [theta_tw_u,theta_tw_l, TR_u, TR_l, d];
 
@@ -68,18 +70,21 @@ k_cr = k_hover*cosh(7.5*mu_x^2);
 % --------- Initial Inflow Calculation ----------- %
 % drag of helicopter in forward flight
 D = 0.5*rho_input*Vx^2*S_f*Cd_f; % fuselage drag
-alpha_s = atan(Vc/Vx) + atan(D/(g_input*GTOW)); % Rotor angle of attacked
+% alpha_s = atan(Vc/Vx) + atan(D/(g_input*GTOW)); % Rotor angle of attacked
+alpha_s = atan2( Vc , max(Vx,1e-6) ) ...
+        + atan2( D , g_input*GTOW );
 
-Ct_u_req = Cw/2/cos(alpha_s);
+% Ct_u_req = Cw/2/cos(alpha_s);
+Ct_u_req = Cw /( 2 * max( cos(alpha_s) , 1e-3 ) );   % floor cos() at 0.00
 
 % inflow calculation using iteration in forward flight
 % Define the function whose root we want to find
-f = @(lambda) lambda - (mu_x * tan(alpha_s) + Ct_u_req / (2 * sqrt(mu_x^2 + lambda.^2)));
-lambda0 = sqrt(Ct_u_req/2); % Initial guess from hover value
-lambda_ff = fzero(f, lambda0); % Use fzero to find total inflow 
+% f = @(lambda) lambda - (mu_x * tan(alpha_s) + Ct_u_req / (2 * sqrt(mu_x^2 + lambda.^2)));
+% lambda0 = sqrt(Ct_u_req/2); % Initial guess from hover value
+% lambda_ff = fzero(f, lambda0); % Use fzero to find total inflow 
 
 % induced inflow
-lambda_induced_ff = Ct_u_req/(2*sqrt(mu_x^2 + lambda_ff^2));
+% lambda_induced_ff = Ct_u_req/(2*sqrt(mu_x^2 + lambda_ff^2));
 
 % initial estimate of collective pitch - simplified CT expression in
 % forward flight
@@ -179,15 +184,26 @@ count = 1;
             U_p(i,j) = U_P;
             % U_R = mu_x*Vtip*cos(psi);
             U = sqrt(U_T^2 + U_P^2);
-            Mach(i,j) = U/334.3;
-            Reynolds(i,j) = rho_input*sqrt(U_T^2 + U_P^2)*c_u(r(j))/1.628e-5;
+            Mach(i,j) = U/a_input;
+            Reynolds(i,j) = rho_input*sqrt(U_T^2 + U_P^2)*c_u(r(j))/mu_input;
     
 
             % Prandlt tip loss
-            phi = atan((U_P/U_T));
+            % phi = atan((U_P/U_T));
+            % InflowAngle(i,j) = phi;
+            % f = Nb/2* (1-r(j))/(r(j)*phi);
+            % F = 2/pi * acos(exp(-f));
+
+            % Prandtl tip-loss and inflow angle (robust version)
+            phi = atan2( U_P , U_T ); % −π < φ ≤ π, safe for U_T ≈ 0
+            % store the raw inflow angle
             InflowAngle(i,j) = phi;
-            f = Nb/2* (1-r(j))/(r(j)*phi);
-            F = 2/pi * acos(exp(-f));
+            % floor |φ| at 1e-4 rad (≈0.006°) to avoid division-by-zero in ‘f’
+            phi_safe = sign(phi) .* max( abs(phi) , 1e-4 );
+            f = Nb/2 * (1 - r(j)) ./ ( r(j) .* phi_safe );
+            % guard against round-off so exp(–f) stays in [0,1]
+            f = max(f, 0); % negative f would give cosh-like values
+            F = 2/pi * acos( exp(-f) ); % Prandtl tip-loss factor, 0 ≤ F ≤ 1
     
             % local angle of attack
             AoA(i,j) = pitch_j - phi -AoA_zl;
