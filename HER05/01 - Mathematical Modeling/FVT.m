@@ -17,7 +17,7 @@ Area = VTl*VTw;
 alpha = atand(v/u)+rad2deg(delR);
 
 [CL,CD] = NACA0015(alpha);
-LVT = CL*0.5*rho*u^2*Area;
+LVT = CL*0.5*rho*(u^2+v^2+w^2)*Area;
 DVT = CD*0.5*rho*u^2*Area;
 
 end

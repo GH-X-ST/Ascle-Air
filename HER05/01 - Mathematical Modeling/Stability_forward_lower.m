@@ -1,4 +1,4 @@
-function [T, H, Y, Q, Mx, My, Cq_i, beta1c_LR, beta1s_LR] = Stability_forward_lower(u, v, w, rho_input, m_input, g_input, polar, theta_0_l, theta_0_u, theta_1c, theta_1s)
+function [T, H, Y, Q, Mx, My, Cq_i, beta1c_LR, beta1s_LR] = Stability_forward_lower(u, v, w, a_input, rho_input, mu_input, m_input, g_input, polar, theta_0_l, theta_0_u, theta_1c, theta_1s)
 
 % noted that theta_0_u (here) = theta_0_l (in actual)
 % and theta_0_l (here) = theta_0_u (in actual)
@@ -179,8 +179,8 @@ count = 1;
             U_p(i,j) = U_P;
             % U_R = mu_x*Vtip*cos(psi);
             U = sqrt(U_T^2 + U_P^2);
-            Mach(i,j) = U/334.3;
-            Reynolds(i,j) = rho_input*sqrt(U_T^2 + U_P^2)*c_u(r(j))/1.628e-5;
+            Mach(i,j) = U/a_input;
+            Reynolds(i,j) = rho_input*sqrt(U_T^2 + U_P^2)*c_u(r(j))/mu_input;
     
 
             % Prandlt tip loss

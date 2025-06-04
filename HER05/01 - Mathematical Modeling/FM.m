@@ -168,7 +168,7 @@ l_VT = x_CG + x_VT;
 l_HT = x_CG + x_HT;
 
 %% 2 International Standard Atmosphere model
-[~, ~, ~, rho, ~, ~] = atmosisa(h);
+[~, a, ~, rho, ~, mu] = atmosisa(h);
 
 %% 3 System & Structure Model
 
@@ -182,7 +182,7 @@ if u == 0
     
     % 4.2 Hover and climb aerodynamics & dynamics
 
-    [T_UR, T_LR, ~, ~, ~, ~] = Stability_hover_getT(u, v, w, rho, m, g, polar, theta_UR, theta_LR);
+    [T_UR, T_LR, ~, ~, ~, ~] = Stability_hover_getT(u, v, w, a, rho, mu, m, g, polar, theta_UR, theta_LR);
 
     % [~, ~, beta1c_UR, beta1s_UR] = getFlappingResponse(u, rho, m, CT, theta_UR, theta_LR, theta_1c, theta_1s, 'upper');
     % [~, ~, beta1c_LR, beta1s_LR] = getFlappingResponse(u, rho, m, CT, theta_UR, theta_LR, theta_1c, theta_1s, 'lower');
@@ -193,7 +193,7 @@ else
     
     % 4.4 Forward flight aerodynamics & dynamics
 
-    [T_UR, T_LR, H_UR, H_LR, Y_UR, Y_LR, Q_UR, Q_LR, Mx_UR, My_UR, Mx_LR, My_LR, ~, ~, beta1c_UR, beta1s_UR, beta1c_LR, beta1s_LR] = Stability_forward(u, v, w, rho, m, g, polar, theta_UR, theta_LR, theta_1c, theta_1s);
+    [T_UR, T_LR, H_UR, H_LR, Y_UR, Y_LR, Q_UR, Q_LR, Mx_UR, My_UR, Mx_LR, My_LR, ~, ~, beta1c_UR, beta1s_UR, beta1c_LR, beta1s_LR] = Stability_forward(u, v, w, a, rho, mu, m, g, polar, theta_UR, theta_LR, theta_1c, theta_1s);
 
     Q_UR = -Q_UR; % to reaction torque
 
