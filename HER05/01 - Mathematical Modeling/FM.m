@@ -199,6 +199,8 @@ else
 
     Q_LR = -Q_LR; % to reaction torque
 
+    beta1s_LR = -beta1s_LR; % clockwise rotation
+
 end
 
 %% 5 Fuselage Aerodynamics Model
