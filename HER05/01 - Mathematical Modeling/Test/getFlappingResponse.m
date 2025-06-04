@@ -1,11 +1,8 @@
-function [Beta, Beta_dot] = getFlappingForwardResponse(Vx,e,CT,theta0_deg,theta_tw_deg,theta_1c_deg,theta_1s_deg,rotor)
+function [Beta, Beta_dot, beta_1c_rad, beta_1s_rad] = getFlappingResponse(Vx, rho_input, m_input, CT, theta0_u_rad, theta0_l_rad, theta_1c_rad, theta_1s_rad, rotor)
 
-    % All output beta angles are radians !!
-    % All input theta angles are degrees !!
-   
-
+% All input and output angles are radians
     
-    % ===== Physical parameters =====
+% ===== Physical parameters =====
 
 Cl_alpha = 6.2305;         % Lift curve slope (1/rad)
 
@@ -13,7 +10,9 @@ Cl_alpha = 6.2305;         % Lift curve slope (1/rad)
 constants = getConstants();  % or use setupConstants() directly if you prefer
 
 % Access individual constants using dot notation
-GTOW    = constants.GTOW;      % kg
+% GTOW    = constants.GTOW;      % kg
+GTOW    = m_input;
+e       = constants.e;
 Nb      = constants.Nb;
 AR      = constants.AR;
 V_tip    = constants.Vtip;      % m/s
@@ -30,16 +29,20 @@ Cd_f    = constants.Cd_f;      % fuselage drag coeff
 S_f     = constants.S_f;       % fuselage frontal area
 Omega   = constants.Omega;     % angular speed
 
+theta_tw_u_rad = constants.theta_tw_u;
+theta_tw_l_rad = constants.theta_tw_l;
+
+
 
 % theta0 & theta_twist values
 
-theta0_rad = theta0_deg * (pi/180);  % in radian
-theta_tw_rad = theta_tw_deg * (pi/180); % in radian
+% theta0_rad = theta0_deg * (pi/180);  % in radian
+% theta_tw_rad = theta_tw_deg * (pi/180); % in radian
 
 % theta_1s & theta_1c values 
-theta_1s_rad = theta_1s_deg * (pi/180); % in radian
+% theta_1s_rad = theta_1s_deg * (pi/180); % in radian
 
-theta_1c_rad = theta_1c_deg * (pi/180); % in radian
+% theta_1c_rad = theta_1c_deg * (pi/180); % in radian
 
 % Flexbeam parameters (from structure team)
 
@@ -82,7 +85,7 @@ m = 8.88;            % Uniform mass distribution (kg/m) --- based on blade mater
 Ib = (1/3)*m*R^3*(1-e)^3;
 
 % === Lock Number ===
-gamma = rho_cruise * c * Cl_alpha * R^4/Ib;
+gamma = rho_input * c * Cl_alpha * R^4/Ib;
 
 % === Rotating flap frequency ===
 nu_flap = sqrt(1 + (3*e)/(2*(1-e)) + k_beta/(Ib*Omega^2));
@@ -118,13 +121,12 @@ beta_p_rad = deg2rad(beta_p_deg);
 
 if rotor == "upper"
 
-    theta0_u = 11.61; % from BEMT
-    theta0_u_rad = deg2rad(theta0_u);
-    theta_tw_u = -11;
-    theta_tw_u_rad = deg2rad(theta_tw_u);
+    % theta0_u = 11.61; % from BEMT
+    % theta0_u_rad = deg2rad(theta0_u);
+    % theta_tw_u = -11;
+    % theta_tw_u_rad = deg2rad(theta_tw_u);
 
     beta0_rad = (gamma/(nu_flap^2)) * ((theta0_u_rad/8)*(1+mu^2) + (theta_tw_u_rad/10)*(1+(5/6)*mu^2) + (mu/6)*theta_1s_rad - (CT/(12*mu))) + k_beta*beta_p_rad/(Ib*Omega^2*nu_flap^2);
-    
     
     % x = beta_1c, y = beta_1s
     syms x1 y1
@@ -132,7 +134,6 @@ if rotor == "upper"
     eq1 = y1 == (gamma/(nu_flap^2 - 1)) * ((1/8)*(theta_1s_rad + x1)*(1 - 0.5*mu^2) + mu*theta0_u_rad/3 - CT/8 + mu^2*theta_1s_rad/4 + mu*theta_tw_u_rad/4);
     
     eq2 = x1 == (gamma/(nu_flap^2 - 1)) * ((1/8)*(theta_1c_rad - y1)*(1 + 0.5*mu^2) - mu*beta0_rad/6);
-    
     
     sol = solve([eq1, eq2], [x1, y1]);
     
@@ -144,13 +145,10 @@ if rotor == "upper"
 
 elseif rotor == "lower"
     
-    theta0_l = 7.82; 
-    theta0_l_rad = deg2rad(theta0_l);
-    theta_tw_l = -6;
-    theta_tw_l_rad = deg2rad(theta_tw_l);
-    
-    
-    
+    % theta0_l = 7.82; 
+    % theta0_l_rad = deg2rad(theta0_l);
+    % theta_tw_l = -6;
+    % theta_tw_l_rad = deg2rad(theta_tw_l);
     
     beta0_rad = (gamma/(nu_flap^2)) * ((theta0_l_rad/8)*(1+mu^2) + (theta_tw_l_rad/10)*(1+(5/6)*mu^2) + (mu/6)*theta_1s_rad - (CT/(12*mu))) + k_beta*beta_p_rad/(Ib*Omega^2*nu_flap^2);
     
@@ -174,3 +172,5 @@ end
 Beta = @(psi) beta0_rad + beta_1c_rad*cos(psi) + beta_1s_rad*sin(psi);
 
 Beta_dot = @(psi) (-beta_1c_rad*sin(psi) + beta_1s_rad*cos(psi))*Omega;
+
+end

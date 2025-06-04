@@ -147,7 +147,7 @@ while abs(eps) > tol
         dCt_j3(j) = 4*F*lambda_j(j)*(lambda_j(j) - lambda_c)*r(j)*dr;
         dCl_j(j) = Cl_alpha*(pitch_j - phi - AoA_zl);
 
-        dCt_j4(j) = Nb*0.5*rho*U^2*c_u(r(j))*Cl*dr*R/(rho_input*Ae*Vtip^2);
+        dCt_j4(j) = Nb*0.5*rho_input*U^2*c_u(r(j))*Cl*dr*R/(rho_input*Ae*Vtip^2);
         dT_j(j) = dCt_j2(j)*(rho_input*Ae*Vtip^2);
 
         dCp_j(j) = dCt_j3(j)*lambda_j(j);
@@ -155,7 +155,7 @@ while abs(eps) > tol
         % incremental power
   
         dCp_induced_j(j) = dCt_j4(j)*lambda_j(j);
-        dCp_profile_j(j) = Nb*(0.5*rho*U^2*c_u(r(j))*Cd*dr*R)*U_T/(rho*Ae*Vtip^3); % profile power
+        dCp_profile_j(j) = Nb*(0.5*rho_input*U^2*c_u(r(j))*Cd*dr*R)*U_T/(rho_input*Ae*Vtip^3); % profile power
 
     end
 
@@ -280,14 +280,14 @@ while abs(eps_l) > tol
         % dCt_j2(j) = 4*F*lambda_j(j)*(lambda_j(j) - lambda_c)*r(j)*dr;
         dCl_j_l(j) = Cl_alpha*(pitch_j - phi - AoA_zl);
 
-        dCt_j2_l(j) = Nb*0.5*rho*U^2*c_l(r(j))*Cl*dr*R/(rho*Ae*Vtip^2);
-        dT_j_l(j) = dCt_j_l(j)*(rho*Ae*Vtip^2);
+        dCt_j2_l(j) = Nb*0.5*rho_input*U^2*c_l(r(j))*Cl*dr*R/(rho_input*Ae*Vtip^2);
+        dT_j_l(j) = dCt_j_l(j)*(rho_input*Ae*Vtip^2);
 
         % incremental power
         dCp_j_l(j) = dCt_j_l(j)*lambda_j_l(j);
 
         dCp_induced_j_l(j) = dCt_j2_l(j)*lambda_j_l(j);
-        dCp_profile_j_l(j) = Nb*(0.5*rho*U^2*c_l(r(j))*Cd*dr*R)*U_T/(rho*Ae*Vtip^3); % profile power
+        dCp_profile_j_l(j) = Nb*(0.5*rho_input*U^2*c_l(r(j))*Cd*dr*R)*U_T/(rho_input*Ae*Vtip^3); % profile power
 
     end
 
@@ -333,5 +333,6 @@ Cp_ideal = sum(Cp_induced_j + Cp_induced_j_l);
 Cp_profile = sum(Cp_profile_j + Cp_profile_j_l);
 FM = Cp_ideal/(k_int*k*Cp_ideal + Cp_profile);
 
+end
 
 

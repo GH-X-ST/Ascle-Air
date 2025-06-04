@@ -22,3 +22,5 @@ lambda_i = mu_x*tan(alpha_s) + lambda_0*(1+k_x*r*cos(psi) + k_y*r*sin(psi));
 
 % total inflow = forward flight inflow + climb inflow + induced inflow 
 lambda = mu_x*tan(alpha_s) + lambda_i + mu_z;
+
+end

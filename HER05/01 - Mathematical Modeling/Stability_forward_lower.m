@@ -1,11 +1,14 @@
-function [T, H, Y, Q, Mx, My, Cq_i, theta_0_l] = Stability_forward_lower(u, v, w, rho_input, m_input, g_input, polar)
+function [T, H, Y, Q, Mx, My, Cq_i, beta1c_LR, beta1s_LR] = Stability_forward_lower(u, v, w, rho_input, m_input, g_input, polar, theta_0_l, theta_0_u, theta_1c, theta_1s)
+
+% noted that theta_0_u (here) = theta_0_l (in actual)
+% and theta_0_l (here) = theta_0_u (in actual)
 
 % Get all constants
 constants = getConstants();  % or use setupConstants() directly if you prefer
 
 % Access individual constants using dot notation
-% GTOW    = constants.GTOW;    % kg
-GTOW    = m_input;             % kg
+% GTOW    = constants.GTOW;      % kg
+GTOW    = m_input;
 Nb      = constants.Nb;
 AR      = constants.AR;
 Vtip    = constants.Vtip;      % m/s
@@ -21,22 +24,27 @@ rho_cr  = constants.rho_cr;    % cruise density
 Cd_f    = constants.Cd_f;      % fuselage drag coeff
 S_f     = constants.S_f;       % fuselage frontal area
 Omega   = constants.Omega;     % angular speed
-e = constants.e; % flapping hinge
-theta_1c = constants.theta_1c; % deg;
-theta_1s = constants.theta_1s; % deg;  
+
+% e = constants.e; % flapping hinge
+
+% theta input is radian now (Hanchen)
+
+% theta_1c = constants.theta_1c; % deg;
+% theta_1s = constants.theta_1s; %  deg;  
 
 % addpath('Airfoil');
 % polar = loadPolarData('xf-rc410-il-1000000.txt');
 
-theta_tw_u=rad2deg(constants.theta_tw_l); % too lazy to change the naming to lower so here is lower rotor
+theta_tw_u = rad2deg(constants.theta_tw_l); % too lazy to change the naming to lower so here is lower rotor
 TR_u = 1;
-v = 0;
-Vc=w;
-Vx=u;
-Ct_u_req = (g_input*GTOW/(rho_input*Ae*Vtip^2))/2;
+% v  = 0;
+Vc = w;
+Vx = u;
+Cw = (g_input*GTOW/(rho_input*Ae*Vtip^2));
 
 % Parameter Input
 theta_tw_u = theta_tw_u/R*pi/180*R;
+theta_0_u = theta_0_u * pi/180;
 
 % BladeGeometryInput = [theta_tw_u,theta_tw_l, TR_u, TR_l, d];
 
@@ -62,6 +70,8 @@ k_cr = k_hover*cosh(7.5*mu_x^2);
 D = 0.5*rho_input*Vx^2*S_f*Cd_f; % fuselage drag
 alpha_s = atan(Vc/Vx) + atan(D/(g_input*GTOW)); % Rotor angle of attacked
 
+Ct_u_req = Cw/2/cos(alpha_s);
+
 % inflow calculation using iteration in forward flight
 % Define the function whose root we want to find
 f = @(lambda) lambda - (mu_x * tan(alpha_s) + Ct_u_req / (2 * sqrt(mu_x^2 + lambda.^2)));
@@ -73,11 +83,11 @@ lambda_induced_ff = Ct_u_req/(2*sqrt(mu_x^2 + lambda_ff^2));
 
 % initial estimate of collective pitch - simplified CT expression in
 % forward flight
-theta_0_u_initial = ((2*Ct_u_req*pi*R/Cl_alpha0/Nb) ...
-                    - theta_tw_u*c0_u/4 * (4/5*TR_u+1/5)*(1+mu_x^2) ...
-                    + lambda_ff*c0_u/2 * (2/3*TR_u+1/3)) * 3*(1+3/2*mu_x^2)^(-1)*(c0_u*(3*TR_u/4+1/4))^(-1);
+% theta_0_u_initial = ((2*Ct_u_req*pi*R/Cl_alpha0/Nb) ...
+%                     - theta_tw_u*c0_u/4 * (4/5*TR_u+1/5)*(1+mu_x^2) ...
+%                     + lambda_ff*c0_u/2 * (2/3*TR_u+1/3)) * 3*(1+3/2*mu_x^2)^(-1)*(c0_u*(3*TR_u/4+1/4))^(-1);
 
-lambda_induced_j = lambda_induced_ff;
+% lambda_induced_j = lambda_induced_ff;
 
 
 % Discretisation
@@ -94,7 +104,7 @@ azimuth = linspace(0,2*pi,NN);
 dr = r(2)-r(1);
 dpsi = azimuth(2)-azimuth(1);
 
-theta_0_u = theta_0_u_initial;
+% theta_0_u = theta_0_u_initial;
 
 eps = 1;
 
@@ -137,12 +147,15 @@ Reynolds = zeros(length(azimuth),length(r));
 
 count = 1;
 
-while abs(eps) > tol
+% while abs(eps) > tol
 % for ii = 1:5
 
     % flapping respons - at 140 knots, 
     % assuming e = 0.1; theta_1s_deg = -3; % from paper -- flight test; theta_1c_deg = 0.2; % from paper -- flight test
-    [beta, beta_dot] = getFlappingForwardResponse(Vx, e, Ct_u_req, 0, theta_0_u, theta_1s, theta_1c, 'lower'); % inputs are degree
+    % [beta,beta_dot] = getFlappingForwardResponse(Vx, e,Ct_u_req,theta_0_u*180/pi,theta_tw_u*180/pi,theta_1c,theta_1s, 'lower'); % inputs are degree
+
+    % [Beta, Beta_dot, beta_1c_rad, beta_1s_rad] = getFlappingResponse(Vx, rho_input, m_input, CT, theta0_u_rad, theta0_l_rad, theta_1c_rad, theta_1s_rad, rotor)
+    [beta, beta_dot, beta1c_LR, beta1s_LR] = getFlappingResponse(Vx, rho_input, m_input, Ct_u_req, theta_0_l, theta_0_u, theta_1c, theta_1s, 'lower'); % inputs are radian
 
     % at each discretised azimuth location dpsi
     for i = 1:length(azimuth)
@@ -151,7 +164,7 @@ while abs(eps) > tol
         for j = 1:length(r)
                        
             sigma_j = sigma_u(r(j)); % 
-            pitch_j = theta_0_u + theta_tw_u*(r(j)) + theta_1c*pi/180*cos(psi) + theta_1s*pi/180*sin(psi); % involve pilot cyclic input
+            pitch_j = theta_0_u + theta_tw_u*(r(j)) + theta_1c*cos(psi) + theta_1s*sin(psi); % involve pilot cyclic input
 
             % linear inflow model at each blade element
             [lambda_i,lambda_j] = LinearInflow_ff(mu_x, lambda_c, alpha_s, Ct_u_req, r(j), psi);
@@ -167,7 +180,7 @@ while abs(eps) > tol
             % U_R = mu_x*Vtip*cos(psi);
             U = sqrt(U_T^2 + U_P^2);
             Mach(i,j) = U/334.3;
-            Reynolds(i,j) = rho_cr*sqrt(U_T^2 + U_P^2)*c_u(r(j))/1.628e-5;
+            Reynolds(i,j) = rho_input*sqrt(U_T^2 + U_P^2)*c_u(r(j))/1.628e-5;
     
 
             % Prandlt tip loss
@@ -197,10 +210,10 @@ while abs(eps) > tol
                 dFz = 0;
                 dFx = 0;
             else
-                dFz2 = 0.5*rho_cr*c_u(r(j))*(Cl_alpha0/sqrt(1-Mach(i,j)^2))*((pitch_j) * U_T^2 - U_P*U_T)*dr*R;
-                dFz = 0.5*rho_cr*U^2*c_u(r(j))*Cl*dr*R;
-                dFx2 = 0.5*rho_cr*c_u(r(j))*(Cl_alpha0/sqrt(1-Mach(i,j)^2))*((pitch_j) * U_T*U_P - U_P^2 + Cd/(Cl_alpha0/sqrt(1-Mach(i,j)^2))*U_T^2)*dr*R;
-                dFx = 0.5*rho_cr*U^2*c_u(r(j))*Cd*dr*R;
+                dFz2 = 0.5*rho_input*c_u(r(j))*(Cl_alpha0/sqrt(1-Mach(i,j)^2))*((pitch_j) * U_T^2 - U_P*U_T)*dr*R;
+                dFz = 0.5*rho_input*U^2*c_u(r(j))*Cl*dr*R;
+                dFx2 = 0.5*rho_input*c_u(r(j))*(Cl_alpha0/sqrt(1-Mach(i,j)^2))*((pitch_j) * U_T*U_P - U_P^2 + Cd/(Cl_alpha0/sqrt(1-Mach(i,j)^2))*U_T^2)*dr*R;
+                dFx = 0.5*rho_input*U^2*c_u(r(j))*Cd*dr*R;
             end
             dFr = -beta(psi)*dFz;
 
@@ -212,18 +225,18 @@ while abs(eps) > tol
             dMy(i,j) = Nb*dFz*r(j)*R*cos(psi);
 
             % sectional thrust coeff
-            dCt_j(i,j) = dT(i,j)/(rho_cr*Ae*Vtip^2);
-            dCt_j2(i,j) = Nb*dFz2/(rho_cr*Ae*Vtip^2);
+            dCt_j(i,j) = dT(i,j)/(rho_input*Ae*Vtip^2);
+            dCt_j2(i,j) = Nb*dFz2/(rho_input*Ae*Vtip^2);
 
             % sectional torque coeff
-            dCq_j(i,j) = dQ(i,j)*Omega/(rho_cr*Ae*Vtip^3);
-            dCq_j2(i,j) = Nb*dFx2*r(j)*R*Omega/(rho_cr*Ae*Vtip^3);
+            dCq_j(i,j) = dQ(i,j)*Omega/(rho_input*Ae*Vtip^3);
+            dCq_j2(i,j) = Nb*dFx2*r(j)*R*Omega/(rho_input*Ae*Vtip^3);
 
             % sectional rotor drag coeff
-            dCH_j(i,j) = dH(i,j)/(rho_cr*Ae*Vtip^2);
+            dCH_j(i,j) = dH(i,j)/(rho_input*Ae*Vtip^2);
 
             % sectional rotor side force coeff
-            dCY_j(i,j) = dY(i,j)/(rho_cr*Ae*Vtip^2);
+            dCY_j(i,j) = dY(i,j)/(rho_input*Ae*Vtip^2);
 
             % dCl_j(i,j) = Cl_alpha*(pitch_j - phi - AoA_zl);
             dCl_j(i,j) = Cl;
@@ -231,7 +244,7 @@ while abs(eps) > tol
             
             % sectional power
             dCp_induced_j(i,j) = dCt_j(i,j) * lambda_induced(i,j); % induced power
-            dCp_profile_j(i,j) = Nb*dFx*U_T/(rho_cr*Ae*Vtip^3); % profile power
+            dCp_profile_j(i,j) = Nb*dFx*U_T/(rho_input*Ae*Vtip^3); % profile power
             dCp_j(i,j) = k_cr*dCp_induced_j(i,j) + dCp_profile_j(i,j);
  
         end
@@ -276,26 +289,26 @@ while abs(eps) > tol
 
     % Lift
 
-    theta_0_u_new = theta_0_u + ((2*(Ct_u_req - Ct_i(count))*pi*R/Cl_alpha0/Nb)) * 3*(c0_u*(3*TR_u/4+1/4))^-1;
-
-    % Calculate residual
-    eps(count) = theta_0_u_new - theta_0_u;
-    eps2(count) = (Ct_u_req - Ct_i(count));
-    
-    % update 
-    theta_0_u = theta_0_u_new;
-    % lambda_total = lambda_total_j;
-
-    record(count) = theta_0_u;
-    count = count+1;
-end
+%     theta_0_u_new = theta_0_u + ((2*(Ct_u_req - Ct_i(count))*pi*R/Cl_alpha0/Nb)) * 3*(c0_u*(3*TR_u/4+1/4))^-1;
+% 
+%     % Calculate residual
+%     eps(count) = theta_0_u_new - theta_0_u;
+%     eps2(count) = (Ct_u_req - Ct_i(count));
+% 
+%     % update 
+%     theta_0_u = theta_0_u_new;
+%     % lambda_total = lambda_total_j;
+% 
+%     record(count) = theta_0_u;
+%     count = count+1;
+% end
 
 % Lift to drag ratio
 L_to_D = Ct_u_req*mu_x/(Cp_i(end)); % rotor lift-to-drag
 L_to_D2 = Ct_u_req*mu_x/(Cp_i(end)+0.5*S_f*Cd_f/Ae*mu_x^3); % helicopter lift-to-drag
 
 
-theta_0_l = theta_0_u;
+% theta_0_l = theta_0_u;
 
 
 
@@ -443,3 +456,5 @@ theta_0_l = theta_0_u;
 % xlabel('X (r/R)'); ylabel('Y (r/R)');
 % colorbar; colormap turbo;
 % view(2); box on;
+
+end

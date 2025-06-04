@@ -279,7 +279,7 @@ eps_l = 1;
         dCl_j_l(j) = Cl_alpha*(pitch_j - phi - AoA_zl);
 
         % dCt_j2_l(j) = Nb*0.5*rho*U^2*c_l(r(j))*Cl*dr*R/(rho*Ae*Vtip^2);
-        dT_j_l(j) = dCt_j_l(j)*(rho*Ae*Vtip^2);
+        dT_j_l(j) = dCt_j_l(j)*(rho_input*Ae*Vtip^2);
 
         % incremental power
         dCp_j_l(j) = dCt_j_l(j)*lambda_j_l(j);
@@ -330,3 +330,5 @@ eps_l = 1;
 % Cp_ideal = sum(Cp_induced_j + Cp_induced_j_l);
 % Cp_profile = sum(Cp_profile_j + Cp_profile_j_l);
 % FM = Cp_ideal/(k_int*k*Cp_ideal + Cp_profile);
+
+end
