@@ -112,7 +112,7 @@ t_process = 2;        % Actual process time per part (hr)
 cost_modulus = 1.2;   % Relative complexity factor
 labor_rate = 50;      % $/hr
 machine_rate = 150;   % $/hr
-num_parts = 5;
+num_parts = 50;
 
 
 
@@ -167,7 +167,7 @@ fprintf('ABC Estimated Cost: $%.2f\n', abc_cost);
 % ===================================================================
 
 % Inputs
-fixed_cost = 150;           % Development + tooling ($ million)
+fixed_cost = 180;           % Development + tooling ($ million)
 unit_cost = 7.0;            % Production cost per unit ($ million)
 sell_price = 8.1;           % Selling price per unit ($ million)
 
@@ -216,7 +216,7 @@ grid on;
 
 C1 = 7;                    % Cost of first unit ($ million)
 n = 136;                   % Unit number to evaluate
-learning_rate = 0.98;
+learning_rate = 0.96;
 
 b = log2(learning_rate);
 Cn = C1 * n^b;
@@ -238,7 +238,7 @@ grid on;
 % ===================================================================
 
 units_total = 136;
-C_dev = 150;              
+C_dev = 180;              
 C_prod = unit_cost * units_total;   
 C_ops = 2.0 * units_total;      
 C_maint = 1.0 * units_total;    
@@ -259,7 +259,7 @@ grid on;
 % DEVELOPMENT COST PHASING WITH INFLATION
 % ===================================================================
 
-base_cost = 150;       
+base_cost = 180;       
 inflation = 0.03;      
 years = 8;
 
