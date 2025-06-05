@@ -172,15 +172,7 @@ count = 1;
             pitch_j = theta_0_u + theta_tw_u*(r(j)) + theta_1c*cos(psi) + theta_1s*sin(psi); % involve pilot cyclic input
 
             % linear inflow model at each blade element
-            if abs(u) <= 30
-
-                [lambda_i,lambda_j] = LinearInflow_ff_test(mu_x, lambda_c, alpha_s, Ct_u_req, r(j), psi);
-
-            else
-                
-                [lambda_i,lambda_j] = LinearInflow_ff(mu_x, lambda_c, alpha_s, Ct_u_req, r(j), psi);
-
-            end
+            [lambda_i,lambda_j] = LinearInflow_ff_test(mu_x, lambda_c, alpha_s, Ct_u_req, r(j), psi);
 
             lambda(i,j) = lambda_j;
             lambda_induced(i,j) = lambda_i;

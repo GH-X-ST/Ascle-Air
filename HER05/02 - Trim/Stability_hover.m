@@ -35,7 +35,7 @@ TR_l = 1;
 d = 0;
 u = 0;
 v = 0;
-Vc = w;
+Vc = -w;
 
 [~, ~, Ct_u_final, Ct_l_final] = BEMT_axial_optimisation_func(theta_tw_u,theta_tw_l, TR_u, TR_l, Vc, polar);
 
@@ -150,7 +150,7 @@ while abs(eps) > tol
         dCt_j4(j) = Nb*0.5*rho_input*U^2*c_u(r(j))*Cl*dr*R/(rho_input*Ae*Vtip^2);
         dT_j(j) = dCt_j2(j)*(rho_input*Ae*Vtip^2);
 
-        dCp_j(j) = dCt_j3(j)*lambda_j(j);
+        dCp_j(j) = dCt_j3(j)*(lambda_j(j) - lambda_c);
 
         % incremental power
   
@@ -284,7 +284,7 @@ while abs(eps_l) > tol
         dT_j_l(j) = dCt_j_l(j)*(rho_input*Ae*Vtip^2);
 
         % incremental power
-        dCp_j_l(j) = dCt_j_l(j)*lambda_j_l(j);
+        dCp_j_l(j) = dCt_j_l(j)*(lambda_j_l(j) - lambda_c);
 
         dCp_induced_j_l(j) = dCt_j2_l(j)*lambda_j_l(j);
         dCp_profile_j_l(j) = Nb*(0.5*rho_input*U^2*c_l(r(j))*Cd*dr*R)*U_T/(rho_input*Ae*Vtip^3); % profile power
