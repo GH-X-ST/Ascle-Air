@@ -191,7 +191,7 @@ if u == 0
 
 else
     
-    % 4.4 Forward flight aerodynamics & dynamics
+    % 4.3 Forward flight aerodynamics & dynamics
 
     [T_UR, T_LR, H_UR, H_LR, Y_UR, Y_LR, Q_UR, Q_LR, Mx_UR, My_UR, Mx_LR, My_LR, ~, ~, beta1c_UR, beta1s_UR, beta1c_LR, beta1s_LR] = Stability_forward(u, v, w, a, rho, mu, m, g, polar, theta_UR, theta_LR, theta_1c, theta_1s);
 
