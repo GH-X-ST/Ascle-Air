@@ -133,7 +133,8 @@ My_UR = 0;     % Upper rotor rolling moment (Nm)
 My_LR = 0;     % Lower rotor pitching moment (Nm)
 
 % 0.4 Initialize fuselage outputs placeholders
-D = 0;         % Fuselage drag (N)
+L_F = 0;       % Fuselage lift (N)
+D_F = 0;       % Fuselage drag (N)
 Y_F = 0;       % Fuselage side force (N)
 Mx_F = 0;      % Fuselage rolling moment (Nm)
 My_F = 0;      % Fuselage pitching moment (Nm)
@@ -187,7 +188,7 @@ if u == 0
     % [~, ~, beta1c_UR, beta1s_UR] = getFlappingResponse(u, rho, m, CT, theta_UR, theta_LR, theta_1c, theta_1s, 'upper');
     % [~, ~, beta1c_LR, beta1s_LR] = getFlappingResponse(u, rho, m, CT, theta_UR, theta_LR, theta_1c, theta_1s, 'lower');
 
-    % It will return empty value as u = 0
+    % It will return empty value as u = 0 due to fsolve
 
 else
     
@@ -205,6 +206,7 @@ end
 
 %% 5 Fuselage Aerodynamics Model
 
+
 %% 6 Empennage Aerodynamics Model
 % 6.1 Horizontal tailplane
 [L_HT, D_HT] = FHT(u, v, w, rho, delta_E);
@@ -214,7 +216,7 @@ end
 
 %% 7 Forces and Moments
 % 7.1 X, Logitudinal Force
-X = -D * cos(alpha_s) - L * sin(alpha_s) - 2 * D_VT - D_HT ...
+X = -D_F * cos(alpha_s) - L_F * sin(alpha_s) - 2 * D_VT - D_HT ...
     - (H_LR * cos(beta1c_LR) + H_UR * cos(beta1c_UR)) ...
     + (T_LR * sin(beta1c_LR) * cos(beta1s_LR) ...
     + T_UR * sin(beta1c_UR) * cos(beta1s_UR));
@@ -226,7 +228,7 @@ Y = Y_F - 2 * L_VT ...
     + T_UR * cos(beta1c_UR) * sin(beta1s_UR));
 
 % 7.3 Z, Lateral Force
-Z = D * sin(alpha_s) - L * cos(alpha_s) - L_HT ...
+Z = D_F * sin(alpha_s) - L_F * cos(alpha_s) - L_HT ...
     - (H_LR * sin(beta1c_LR) + H_UR * sin(beta1c_UR)) ...
     - (Y_LR * sin(beta1s_LR) + Y_UR * sin(beta1s_UR)) ...
     - (T_LR * cos(beta1c_LR) * cos(beta1s_LR) ...
