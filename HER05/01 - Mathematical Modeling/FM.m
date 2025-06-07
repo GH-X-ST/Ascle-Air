@@ -183,7 +183,7 @@ if u == 0
     
     % 4.2 Hover and climb aerodynamics & dynamics
 
-    [T_UR, T_LR, ~, ~, ~, ~] = Stability_hover_getT(u, v, w, a, rho, mu, m, g, polar, theta_UR, theta_LR);
+    [T_UR, T_LR, ~, ~, ~, ~, Q_UR, Q_LR] = Stability_hover_getT(u, v, w, a, rho, mu, m, g, polar, theta_UR, theta_LR);
 
     % [~, ~, beta1c_UR, beta1s_UR] = getFlappingResponse(u, rho, m, CT, theta_UR, theta_LR, theta_1c, theta_1s, 'upper');
     % [~, ~, beta1c_LR, beta1s_LR] = getFlappingResponse(u, rho, m, CT, theta_UR, theta_LR, theta_1c, theta_1s, 'lower');
@@ -205,7 +205,11 @@ else
 end
 
 %% 5 Fuselage Aerodynamics Model
+<<<<<<< HEAD
 [L_F, D_F, Y_F, Mx_F, My_F] = Fuselage_Aero(u, v, w, rho);
+=======
+[L_F, D_F, Y_F, Mx_F, My_F] = Fuselage_Aero(u, v, w, rho)；
+>>>>>>> origin/Main
 
 %% 6 Empennage Aerodynamics Model
 % 6.1 Horizontal tailplane

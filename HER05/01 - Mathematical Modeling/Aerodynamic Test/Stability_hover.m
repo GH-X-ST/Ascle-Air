@@ -1,4 +1,4 @@
-function [T_u, T_l, Ct_j_u, Ct_j_l, Cp_j, Cp_j_l, Q_UR, Q_LR] = Stability_hover_getT(u, v, w, a_input, rho_input, mu_input, m_input, g_input, polar, theta_0_u, theta_0_l)
+function [T_u, T_l, Ct_u, Ct_l, Cp_j, Cp_j_l, theta_0_u, theta_0_l] = Stability_hover(u, v, w, a_input, rho_input, mu_input, m_input, g_input, polar)
 
 % Get all constants
 constants = getConstants();  % or use setupConstants() directly if you prefer
@@ -37,7 +37,7 @@ u = 0;
 v = 0;
 Vc = -w;
 
-% [~, ~, Ct_u_final, Ct_l_final] = BEMT_axial_optimisation_func(theta_tw_u,theta_tw_l, TR_u, TR_l, Vc, polar);
+[~, ~, Ct_u_final, Ct_l_final] = BEMT_axial_optimisation_func(theta_tw_u,theta_tw_l, TR_u, TR_l, Vc, polar);
 
 % Chord distribution from Taper Ratio
 c0_u = cbar*(3*((TR_u-1)/4 + 1/3))^-1;
@@ -60,32 +60,26 @@ lambda_c = Vc/Vtip;
 Cw = GTOW*g_input/(rho_input*Ae*Vtip^2); % weight coeff
 
 % Equal thrust sharing
-% Ct_u_req = Ct_u_final; % thrust coeff required by upper rotor (Ct_u/Ct_l = 1.2461)
+Ct_u_req = Ct_u_final; % thrust coeff required by upper rotor (Ct_u/Ct_l = 1.2461)
 
 % Non dimensional induced velocity
-lambda_hover = sqrt(Cw/2/2); % hover induced velocity
+lambda_hover = sqrt(Ct_u_req/2); % hover induced velocity
 lambda_induced = -lambda_c/2 + lambda_hover*sqrt((0.5*lambda_c/lambda_hover)^2 + 1); % induced velocity at climb (Momentum Theory)
-% lambda_total = lambda_induced+lambda_c; % lambda_total = lambda_induced + lambda_climb
+lambda_total = lambda_induced+lambda_c; % lambda_total = lambda_induced + lambda_climb
 
 
-% theta_0_u_initial = ((2*Ct_u_req*pi*R/Cl_alpha0/Nb) ...
-                    % - theta_tw_u*c0_u/4 * (4/5*TR_u+1/5) ...
-                    % + lambda_total*c0_u/2 * (2/3*TR_u+1/3)) * 3*(c0_u*(3*TR_u/4+1/4))^-1 ;
+theta_0_u_initial = ((2*Ct_u_req*pi*R/Cl_alpha0/Nb) ...
+                    - theta_tw_u*c0_u/4 * (4/5*TR_u+1/5) ...
+                    + lambda_total*c0_u/2 * (2/3*TR_u+1/3)) * 3*(c0_u*(3*TR_u/4+1/4))^-1 ;
 
 % Discretisation
 N = 100;
 tol = 1e-5;
 r = linspace(r_0,1,N);
 dr = r(2)-r(1);
-% theta_0_u = theta_0_u_initial;
-% lambda_induced_j = lambda_induced;
+theta_0_u = theta_0_u_initial;
+lambda_induced_j = lambda_induced;
 eps = 1;
-
-% disc discretisation - for forward flight analysis
-NN = 90;
-azimuth = linspace(0,2*pi,NN);
-dr = r(2)-r(1);
-dpsi = azimuth(2)-azimuth(1);
 
 % initialise arrays
 lambda_j = zeros(1,length(r));
@@ -101,8 +95,8 @@ AoA_l = zeros(1,length(r));
 
 count = 1;
 
-% while abs(eps) > tol
-% % for i = 1:10
+while abs(eps) > tol
+% for i = 1:10
 
     % for each discretised blade element
     for j = 2:length(r)-1
@@ -113,20 +107,19 @@ count = 1;
  
         % calculate blade sectional velocity
         U_T = Omega*r(j)*R;        
-        % U_P = (lambda_c + lambda_induced_j)*Vtip;
+        U_P = (lambda_c + lambda_induced_j)*Vtip;
         % U_t(i,j) = U_T;
         % U_p(i,j) = U_P;
         % U_R = mu_x*Vtip*cos(psi);
-        U_P = (lambda_c + lambda_induced)*Vtip;
         U = sqrt(U_T^2 + U_P^2);
         Mach(j) = U/a_input;
 
         % Prandlt tip loss
-        phi = atan(U_P/U_T);
+        phi = atan((lambda_c + lambda_induced_j)/r(j));
         f = Nb/2* (1-r(j))/(r(j)*phi);
         F = 2/pi * acos(exp(-f));
-        % 
-        % % local angle of attack
+
+        % local angle of attack
         AoA(j) = pitch_j - phi - AoA_zl;
         
         % compressibility correction
@@ -138,8 +131,8 @@ count = 1;
         % record
         sigma(j) = sigma_j;
         pitch(j) = pitch_j;
-        % inflow_angle(j) = phi;
-        % prandlt_loss(j) = F;
+        inflow_angle(j) = phi;
+        prandlt_loss(j) = F;
 
         % calculate inflow at each blade element
         lambda_j(j) = ((sigma_j*Cl_alpha/16/F - lambda_c/2)^2 ...
@@ -154,66 +147,66 @@ count = 1;
         dCt_j3(j) = 4*F*lambda_j(j)*(lambda_j(j) - lambda_c)*r(j)*dr;
         dCl_j(j) = Cl_alpha*(pitch_j - phi - AoA_zl);
 
-        % dCt_j4(j) = Nb*0.5*rho*U^2*c_u(r(j))*Cl*dr*R/(rho_input*Ae*Vtip^2);
+        dCt_j4(j) = Nb*0.5*rho_input*U^2*c_u(r(j))*Cl*dr*R/(rho_input*Ae*Vtip^2);
         dT_j(j) = dCt_j2(j)*(rho_input*Ae*Vtip^2);
 
         dCp_j(j) = dCt_j3(j)*(lambda_j(j) - lambda_c);
 
         % incremental power
   
-        % dCp_induced_j(j) = dCt_j4(j)*lambda_j(j);
-        % dCp_profile_j(j) = Nb*(0.5*rho*U^2*c_u(r(j))*Cd*dr*R)*U_T/(rho*Ae*Vtip^3); % profile power
+        dCp_induced_j(j) = dCt_j4(j)*lambda_j(j);
+        dCp_profile_j(j) = Nb*(0.5*rho_input*U^2*c_u(r(j))*Cd*dr*R)*U_T/(rho_input*Ae*Vtip^3); % profile power
 
     end
 
     % Sum sectional thrust to get overall Ct
-    Ct_j_u = sum(dCt_j2);
+    Ct_j = sum(dCt_j2);
     T_u = sum(dT_j);
     Cp_j = sum(dCp_j);
-
-    Q_UR = Cp_j * rho_input * Ae * Vtip^3 / Omega;
     
-    % Cp_induced_j = sum(dCp_induced_j);
-    % Cp_profile_j = sum(dCp_profile_j);
+    Cp_induced_j = sum(dCp_induced_j);
+    Cp_profile_j = sum(dCp_profile_j);
 
-    % % Ct_j2 = sum(dCt_j2)
-    % record_Ct(count) = Ct_j;
-    % 
-    % % Recalculate lambdas
-    % lambda_hover_j = sqrt(Ct_j/2); % hover induced velocity
-    % lambda_induced_j = -lambda_c/2 + lambda_hover_j*sqrt((0.5*lambda_c/lambda_hover_j)^2 + 1); % induced velocity at climb (Momentum Theory)
-    % lambda_total_j = lambda_induced_j+lambda_c; % lambda_total = lambda_induced + lambda_climb\
-    % 
-    % theta_0_u_new = theta_0_u + ((2*(Ct_u_req - Ct_j)*pi*R/Cl_alpha0/Nb) ...
-    %                 + (lambda_total - lambda_total_j)*c0_u/2 * (2/3*TR_u+1/3)) * 3*(c0_u*(3*TR_u/4+1/4))^-1;
+    % Ct_j2 = sum(dCt_j2)
+    record_Ct(count) = Ct_j;
 
-%     % Calculate residual
-%     eps(count) = theta_0_u_new - theta_0_u;
-%     eps2(count) = (Ct_u_req - Ct_j);
-% 
-%     % update 
-%     theta_0_u = theta_0_u_new;
-%     % lambda_total = lambda_total_j;
-% 
-%     record(count) = theta_0_u;
-%     count = count+1;
-% end
+    % Recalculate lambdas
+    lambda_hover_j = sqrt(Ct_j/2); % hover induced velocity
+    lambda_induced_j = -lambda_c/2 + lambda_hover_j*sqrt((0.5*lambda_c/lambda_hover_j)^2 + 1); % induced velocity at climb (Momentum Theory)
+    lambda_total_j = lambda_induced_j+lambda_c; % lambda_total = lambda_induced + lambda_climb\
+
+    theta_0_u_new = theta_0_u + ((2*(Ct_u_req - Ct_j)*pi*R/Cl_alpha0/Nb) ...
+                    + (lambda_total - lambda_total_j)*c0_u/2 * (2/3*TR_u+1/3)) * 3*(c0_u*(3*TR_u/4+1/4))^-1;
+
+    % Calculate residual
+    eps(count) = theta_0_u_new - theta_0_u;
+    eps2(count) = (Ct_u_req - Ct_j);
+    
+    % update 
+    theta_0_u = theta_0_u_new;
+    % lambda_total = lambda_total_j;
+
+    record(count) = theta_0_u;
+    count = count+1;
+end
+
+Ct_u = Ct_j;
 
 % --------------- LOW ROTOR ------------------- %
 % Equal thrust sharing
-% Ct_l_req = Ct_l_final; % thrust coeff required by upper rotor (Ct_u/Ct_l = 1.2461)
+Ct_l_req = Ct_l_final; % thrust coeff required by upper rotor (Ct_u/Ct_l = 1.2461)
 
 % Non dimensional induced velocity
-lambda_hover = sqrt(Cw/2/2); % hover induced velocity
+lambda_hover = sqrt(Ct_l_req/2); % hover induced velocity
 lambda_induced = -lambda_c/2 + lambda_hover*sqrt((0.5*lambda_c/lambda_hover)^2 + 1); % induced velocity at climb (Momentum Theory)
-% lambda_total = lambda_induced+lambda_c; % lambda_total = lambda_induced + lambda_climb
+lambda_total = lambda_induced+lambda_c; % lambda_total = lambda_induced + lambda_climb
 
 % initial estimate of collective pitch
-% theta_0_l_initial = ((2*Ct_l_req*pi*R/Cl_alpha0/Nb) ...
-                    % - theta_tw_l*c0_l/4 * (4/5*TR_l+1/5) ...
-                    % + lambda_total*c0_l/2 * (2/3*TR_l+1/3)) * 3*(c0_u*(3*TR_l/4+1/4))^-1; 
+theta_0_l_initial = ((2*Ct_l_req*pi*R/Cl_alpha0/Nb) ...
+                    - theta_tw_l*c0_l/4 * (4/5*TR_l+1/5) ...
+                    + lambda_total*c0_l/2 * (2/3*TR_l+1/3)) * 3*(c0_u*(3*TR_l/4+1/4))^-1; 
 
-% theta_0_l = theta_0_l_initial;
+theta_0_l = theta_0_l_initial;
 lambda_u = lambda_j;
 
 A_Ac = 2;
@@ -221,8 +214,8 @@ r_c = 1/sqrt(2);
 count = 1;
 eps_l = 1;
 
-% while abs(eps_l) > tol
-% % for i = 1:10
+while abs(eps_l) > tol
+% for i = 1:10
 
     % for each discretised blade element
     for j = 2:length(r)-1
@@ -235,12 +228,13 @@ eps_l = 1;
         % calculate blade sectional velocity
         U_T = Omega*r(j)*R;
 
-        % if r(j) <= r_c
-        %     U_P = (lambda_c + lambda_induced+A_Ac*lambda_u(j))*Vtip;
-        % elseif r(j) > r_c
-        %     U_P = (lambda_c + lambda_induced)*Vtip;
-        % end
-        U_P = (lambda_c + lambda_induced)*Vtip;
+        if r(j) <= r_c
+            U_P = (lambda_c + lambda_induced+A_Ac*lambda_u(j))*Vtip;
+        elseif r(j) > r_c
+            U_P = (lambda_c + lambda_induced)*Vtip;
+        end
+
+        % U_P = (lambda_c + lambda_induced_j)*Vtip;
         % U_t(i,j) = U_T;
         % U_p(i,j) = U_P;
         % U_R = mu_x*Vtip*cos(psi);
@@ -286,14 +280,14 @@ eps_l = 1;
         % dCt_j2(j) = 4*F*lambda_j(j)*(lambda_j(j) - lambda_c)*r(j)*dr;
         dCl_j_l(j) = Cl_alpha*(pitch_j - phi - AoA_zl);
 
-        % dCt_j2_l(j) = Nb*0.5*rho*U^2*c_l(r(j))*Cl*dr*R/(rho*Ae*Vtip^2);
+        dCt_j2_l(j) = Nb*0.5*rho_input*U^2*c_l(r(j))*Cl*dr*R/(rho_input*Ae*Vtip^2);
         dT_j_l(j) = dCt_j_l(j)*(rho_input*Ae*Vtip^2);
 
         % incremental power
         dCp_j_l(j) = dCt_j_l(j)*(lambda_j_l(j) - lambda_c);
 
-        % dCp_induced_j_l(j) = dCt_j2_l(j)*lambda_j_l(j);
-        % dCp_profile_j_l(j) = Nb*(0.5*rho*U^2*c_l(r(j))*Cd*dr*R)*U_T/(rho*Ae*Vtip^3); % profile power
+        dCp_induced_j_l(j) = dCt_j2_l(j)*lambda_j_l(j);
+        dCp_profile_j_l(j) = Nb*(0.5*rho_input*U^2*c_l(r(j))*Cd*dr*R)*U_T/(rho_input*Ae*Vtip^3); % profile power
 
     end
 
@@ -303,42 +297,42 @@ eps_l = 1;
 
     T_l = sum(dT_j_l);
 
-    Q_LR = Cp_j_l * rho_input * Ae * Vtip^3 / Omega;
+    Cp_induced_j_l = sum(dCp_induced_j_l);
+    Cp_profile_j_l = sum(dCp_profile_j_l);
 
-    % Cp_induced_j_l = sum(dCp_induced_j_l);
-    % Cp_profile_j_l = sum(dCp_profile_j_l);
+    % Ct_j2 = sum(dCt_j2)
+    record_Ct(count) = Ct_j_l;
 
-    % % Ct_j2 = sum(dCt_j2)
-    % record_Ct(count) = Ct_j_l;
-    % 
-    % % Recalculate lambdas
-    % lambda_hover_j = sqrt(Ct_j_l/2); % hover induced velocity
-    % lambda_induced_j = -lambda_c/2 + lambda_hover_j*sqrt((0.5*lambda_c/lambda_hover_j)^2 + 1); % induced velocity at climb (Momentum Theory)
-    % lambda_total_j = lambda_induced_j+lambda_c; % lambda_total = lambda_induced + lambda_climb
-    % 
-%     theta_0_l_new = theta_0_l + ((2*(Ct_l_req - Ct_j_l)*pi*R/Cl_alpha0/Nb) ...
-%                     + (lambda_total - lambda_total_j)*c0_l/2 * (2/3*TR_l+1/3)) * 3*(c0_l*(3*TR_l/4+1/4))^-1;
-% 
-%     % Calculate residual
-%     eps_l(count) = theta_0_l_new - theta_0_l;
-%     eps2_l(count) = (Ct_l_req - Ct_j_l);
-% 
-%     % update 
-%     theta_0_l = theta_0_l_new;
-%     % lambda_total = lambda_total_j;
-% 
-%     record(count) = theta_0_l;
-%     count = count+1;
-% end
+    % Recalculate lambdas
+    lambda_hover_j = sqrt(Ct_j_l/2); % hover induced velocity
+    lambda_induced_j = -lambda_c/2 + lambda_hover_j*sqrt((0.5*lambda_c/lambda_hover_j)^2 + 1); % induced velocity at climb (Momentum Theory)
+    lambda_total_j = lambda_induced_j+lambda_c; % lambda_total = lambda_induced + lambda_climb
+    
+    theta_0_l_new = theta_0_l + ((2*(Ct_l_req - Ct_j_l)*pi*R/Cl_alpha0/Nb) ...
+                    + (lambda_total - lambda_total_j)*c0_l/2 * (2/3*TR_l+1/3)) * 3*(c0_l*(3*TR_l/4+1/4))^-1;
 
+    % Calculate residual
+    eps_l(count) = theta_0_l_new - theta_0_l;
+    eps2_l(count) = (Ct_l_req - Ct_j_l);
+    
+    % update 
+    theta_0_l = theta_0_l_new;
+    % lambda_total = lambda_total_j;
+
+    record(count) = theta_0_l;
+    count = count+1;
+end
+Ct_l = Ct_j_l;
 % theta_0_l = theta_0_l*180/pi;
 
 
 % FM calcuation
-% k_int = 1.219; % torque trimmed coaxial interference factor
-% k = 1.1; % induced loss factor
-% Cp_ideal = sum(Cp_induced_j + Cp_induced_j_l);
-% Cp_profile = sum(Cp_profile_j + Cp_profile_j_l);
-% FM = Cp_ideal/(k_int*k*Cp_ideal + Cp_profile);
+k_int = 1.219; % torque trimmed coaxial interference factor
+k = 1.1; % induced loss factor
+Cp_ideal = sum(Cp_induced_j + Cp_induced_j_l);
+Cp_profile = sum(Cp_profile_j + Cp_profile_j_l);
+FM = Cp_ideal/(k_int*k*Cp_ideal + Cp_profile);
 
 end
+
+

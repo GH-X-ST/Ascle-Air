@@ -1,4 +1,4 @@
-function [T_u, T_l, Ct_j_u, Ct_j_l, Cp_j, Cp_j_l] = Stability_hover_getT(u, v, w, a_input, rho_input, mu_input, m_input, g_input, polar, theta_0_u, theta_0_l)
+function [T_u, T_l, Ct_j_u, Ct_j_l, Cp_j, Cp_j_l, Q_UR, Q_LR] = Stability_hover_getT(u, v, w, a_input, rho_input, mu_input, m_input, g_input, polar, theta_0_u, theta_0_l)
 
 % Get all constants
 constants = getConstants();  % or use setupConstants() directly if you prefer
@@ -81,6 +81,12 @@ dr = r(2)-r(1);
 % lambda_induced_j = lambda_induced;
 eps = 1;
 
+% disc discretisation - for forward flight analysis
+NN = 90;
+azimuth = linspace(0,2*pi,NN);
+dr = r(2)-r(1);
+dpsi = azimuth(2)-azimuth(1);
+
 % initialise arrays
 lambda_j = zeros(1,length(r));
 dCt_j = zeros(1,length(r));
@@ -121,13 +127,13 @@ count = 1;
         F = 2/pi * acos(exp(-f));
         % 
         % % local angle of attack
-        % AoA(j) = pitch_j - phi - AoA_zl;
+        AoA(j) = pitch_j - phi - AoA_zl;
         
         % compressibility correction
         Cl_alpha = Cl_alpha0/sqrt(1-Mach(j)^2);
 
         % CL and CD from airfoil data (compressibility corrected)
-        % [Cl, Cd] = airfoilCoeffs(AoA(j)*180/pi, polar, Mach(j));
+        [Cl, Cd] = airfoilCoeffs(AoA(j)*180/pi, polar, Mach(j));
 
         % record
         sigma(j) = sigma_j;
@@ -164,6 +170,8 @@ count = 1;
     Ct_j_u = sum(dCt_j2);
     T_u = sum(dT_j);
     Cp_j = sum(dCp_j);
+
+    Q_UR = Cp_j * rho_input * Ae * Vtip^3 / Omega;
     
     % Cp_induced_j = sum(dCp_induced_j);
     % Cp_profile_j = sum(dCp_profile_j);
@@ -249,10 +257,10 @@ eps_l = 1;
         F = 2/pi * acos(exp(-f));
 
         % local angle of attack
-        % AoA_l(j) = pitch_j - phi - AoA_zl;
+        AoA_l(j) = pitch_j - phi - AoA_zl;
 
         % CL and CD from airfoil data (compressibility corrected)
-        % [Cl, Cd] = airfoilCoeffs(AoA_l(j)*180/pi, polar, Mach(j));
+        [Cl, Cd] = airfoilCoeffs(AoA_l(j)*180/pi, polar, Mach(j));
 
         % record
         sigma(j) = sigma_j;
@@ -294,6 +302,8 @@ eps_l = 1;
     Cp_j_l = sum(dCp_j_l);
 
     T_l = sum(dT_j_l);
+
+    Q_LR = Cp_j_l * rho_input * Ae * Vtip^3 / Omega;
 
     % Cp_induced_j_l = sum(dCp_induced_j_l);
     % Cp_profile_j_l = sum(dCp_profile_j_l);
