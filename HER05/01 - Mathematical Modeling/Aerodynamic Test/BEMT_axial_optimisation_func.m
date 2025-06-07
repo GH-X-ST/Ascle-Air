@@ -1,7 +1,10 @@
-function [FM4, eta, Ct_u_final, Ct_l_final] = BEMT_axial_optimisation_func(theta_tw_u,theta_tw_l, TR_u, TR_l, Vc, polar)
+function [FM4, eta, Ct_u_final, Ct_l_final] = BEMT_axial_optimisation_func(theta_tw_u, theta_tw_l, TR_u, TR_l, Vc, polar)
 
 % Get all constants
 constants = getConstants();  % or use setupConstants() directly if you prefer
+
+theta_tw_u = rad2deg(theta_tw_u);
+theta_tw_l = rad2deg(theta_tw_l);
 
 % Access individual constants using dot notation
 GTOW    = constants.GTOW;      % kg
