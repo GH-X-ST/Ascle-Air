@@ -205,7 +205,7 @@ else
 end
 
 %% 5 Fuselage Aerodynamics Model
-
+[L_F, D_F, Y_F, Mx_F, My_F] = Fuselage_Aero(u, v, w, rho);
 
 %% 6 Empennage Aerodynamics Model
 % 6.1 Horizontal tailplane
