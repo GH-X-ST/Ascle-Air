@@ -179,7 +179,7 @@ l_HT = x_CG + x_HT;
 addpath('Airfoil');
 polar = loadPolarData('xf-rc410-il-1000000.txt');
 
-if abs(u) <= 5
+if abs(u) <= 1
     
     % 4.2 Hover and climb aerodynamics & dynamics
 
