@@ -8,7 +8,7 @@ function [LHT,DHT] = FHT(u,v,w,rho,delE)
 % del E positive when airfoil points up (pitch down)
 
 TBD = 0.2; % Tail Boom Diametre
-HTl = 0.9; % Horizontail Tail length (airfoil chord length)
+HTl = 0.6; % Horizontail Tail length (airfoil chord length)
 HTw = 3; % Horizontal Tail width (VT to VT)
 HTt = HTl*0.15; % Horizontal Tail thickness
 VTl = HTl;
