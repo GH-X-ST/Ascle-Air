@@ -16,12 +16,10 @@ cutout = VTl*sind(20); %Loss in elevator width due to cutout of angle in degrees
 
 Area = HTl*(HTw-2*TBD-2*cutout);
 
-alpha = atand(-w/u)+rad2deg(delE);
+alpha = atan2d( -w , u ) + rad2deg(delE);   % robust, no u-division
 
 [CL,CD] = NACA0015(alpha);
-LHT = CL*0.5*rho*u^2*Area;
-DHT = CD*0.5*rho*u^2*Area;
-
-
+LHT = CL*0.5*rho*(u^2+v^2+w^2)*Area;
+DHT = CD*0.5*rho*(u^2+v^2+w^2)*Area;
 
 end

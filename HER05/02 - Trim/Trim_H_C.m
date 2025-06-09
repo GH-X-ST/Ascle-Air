@@ -1,14 +1,10 @@
-function cost = Trim_H_C(theta_LR, theta_UR, theta_1s, theta_1c, phi, theta)
+function cost = Trim_H_C(theta_LR, theta_UR)
 % Author:
 %   Hanchen Li (hl3422@ic.ac.uk)
 %
 % Inputs:
 %   theta_LR  - Lower rotor collective (rad)
 %   theta_UR  - Upper rotor collective (rad)
-%   theta_1s  - Longitudinal cyclic (rad)
-%   theta_1c  - Lateral cyclic (rad)
-%   phi       - Euler roll angle (rad)
-%   theta     - Euler pitch angle (rad)
 %
 % Outputs:
 %   X         - Force along x body axis (+ve forward) (N)
@@ -29,7 +25,7 @@ function cost = Trim_H_C(theta_LR, theta_UR, theta_1s, theta_1c, phi, theta)
 %   phi       - Euler roll angle (rad)
 %   theta     - Euler pitch angle (rad)
 %   psi       - Euler yaw angle (rad)
-state = [0, 0, 0, 0, 0, 0, phi, theta, 0];
+state = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 %   ctrl      - [theta_LR, theta_UR, theta_1s, theta_1c, delta_E, delta_R]
 %   theta_LR  - Lower rotor collective (rad)
@@ -38,7 +34,7 @@ state = [0, 0, 0, 0, 0, 0, phi, theta, 0];
 %   theta_1c  - Lateral cyclic (rad)
 %   delta_E   - Elevator deflection (rad)
 %   delta_R   - Rudder deflection (rad)
-ctrl = [theta_LR, theta_UR, theta_1s, theta_1c, 0, 0];
+ctrl = [theta_LR, theta_UR, 0, 0, 0, 0];
 
 %   params    - [h, m, g, z_R, z_HT, z_VT, x_HT, x_VT]
 %   h         - Altitude (m)
@@ -53,7 +49,7 @@ ctrl = [theta_LR, theta_UR, theta_1s, theta_1c, 0, 0];
 %               aerodynamic centre to shaft (m)
 %   x_VT      - Horizontal distance from vertical tailplane
 %               aerodynamic centre to shaft (m)
-params = [1524, 3500, 9.80665, 1, 0, 0, 5.5, 5.5];
+params = [1524, 3491, 9.80665, 1, 0, 0, 5.5, 5.5];
 
 %% 1 Calling function
 [X, Y, Z, L, M, N, ~, ~, ~, ~] = FM_N(state, ctrl, params);

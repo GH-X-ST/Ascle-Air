@@ -152,7 +152,7 @@ z_CG = 0;
 
 %% 1 Force arms
 
-theta_FP = tan(w / u);
+theta_FP = atan2(w, u);
 
 alpha_s = theta_FP + theta;
 

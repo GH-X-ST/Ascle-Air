@@ -1,6 +1,6 @@
 function [X, Y, Z, L, M, N, I_xx, I_yy, I_zz, I_xz] = FM_N(state, ctrl, params)
 % Introduction:
-%   This function computes the aerodynamic forces and moments acting on the
+%   This function computes the forces and moments acting on the
 %   helicopter in body axes, considering contributions from two coaxial
 %   rotors, gravity and fuselage.
 %
@@ -116,9 +116,9 @@ H_UR = 0;      % Upper rotor drag (N)
 H_LR = 0;      % Lower rotor drag (N)
 Y_UR = 0;      % Upper rotor side force (N)
 Y_LR = 0;      % Lower rotor side force (N)
-Q_diff = 0;    % Q_LR - Q_UR
-% Q_UR = 0;    % Upper rotor torque (+ve clockwise) (Nm)
-% Q_LR = 0;    % Lower rotor torque (+ve anticlockwise) (Nm)
+% Q_diff = 0;    % Q_LR - Q_UR
+Q_UR = 0;      % Upper rotor torque (+ve clockwise) (Nm)
+Q_LR = 0;      % Lower rotor torque (+ve anticlockwise) (Nm)
 beta1c_UR = 0; % Upper rotor longitudinal flapping
                % (+ve disk tilt fore-aft) (rad)
 beta1s_UR = 0; % Lower rotor longitudinal flapping
@@ -133,7 +133,8 @@ My_UR = 0;     % Upper rotor rolling moment (Nm)
 My_LR = 0;     % Lower rotor pitching moment (Nm)
 
 % 0.4 Initialize fuselage outputs placeholders
-D = 0;         % Fuselage drag (N)
+L_F = 0;       % Fuselage lift (N)
+D_F = 0;       % Fuselage drag (N)
 Y_F = 0;       % Fuselage side force (N)
 Mx_F = 0;      % Fuselage rolling moment (Nm)
 My_F = 0;      % Fuselage pitching moment (Nm)
@@ -151,7 +152,7 @@ z_CG = 0;
 
 %% 1 Force arms
 
-theta_FP = tan(w / u);
+theta_FP = atan2(w, u);
 
 alpha_s = theta_FP + theta;
 
@@ -174,25 +175,36 @@ l_HT = x_CG + x_HT;
 
 %% 4 Rotor Aerodynamic Model
 
+% 4.1 Load airfoil data
+addpath('Airfoil');
+polar = loadPolarData('xf-rc410-il-1000000.txt');
 
-
-if u == 0
+if abs(u) <= 5
     
-    % 4.1 Hover and climb
-    
-    T_UR = 0;
+    % 4.2 Hover and climb aerodynamics & dynamics
 
+    [T_UR, T_LR, CT_UR, CT_LR, ~, ~, Q_UR, Q_LR] = Stability_hover_getT(u, v, w, a, rho, mu, m, g, polar, theta_UR, theta_LR);
+
+    [~, ~, beta1c_UR, beta1s_UR] = getFlappingResponse(u, rho, m, CT_UR, theta_UR, theta_LR, theta_1c, theta_1s, 'upper');
+    [~, ~, beta1c_LR, beta1s_LR] = getFlappingResponse(u, rho, m, CT_LR, theta_UR, theta_LR, theta_1c, theta_1s, 'lower');
 
 else
-    
-    % 4.2 Forward flight
 
-    T_UR = 0;
+    % 4.3 Forward flight aerodynamics & dynamics
+
+    [T_UR, T_LR, H_UR, H_LR, Y_UR, Y_LR, Q_UR, Q_LR, Mx_UR, My_UR, Mx_LR, My_LR, ~, ~, beta1c_UR, beta1s_UR, beta1c_LR, beta1s_LR] = ...
+        Stability_forward(u, v, w, a, rho, mu, m, g, polar, theta_UR, theta_LR, theta_1c, theta_1s);
+
+    Q_UR = -Q_UR; % to reaction torque
+
+    Q_LR = -Q_LR; % to reaction torque
+
+    beta1s_LR = -beta1s_LR; % clockwise rotation
 
 end
 
-
 %% 5 Fuselage Aerodynamic Model
+[L_F, D_F, Y_F, Mx_F, My_F] = Fuselage_Aero(u, v, w, rho);
 
 %% 6 Empennage Aerodynamic Model
 % 6.1 Horizontal tailplane
@@ -204,7 +216,7 @@ end
 %% 7 Forces and Moments
 % 7.1 X, Logitudinal Force
 X = -m * g * sin(theta) ...
-    - D * cos(alpha_s) - L * sin(alpha_s) - 2 * D_VT - D_HT ...
+    - D_F * cos(alpha_s) - L_F * sin(alpha_s) - 2 * D_VT - D_HT ...
     - (H_LR * cos(beta1c_LR) + H_UR * cos(beta1c_UR)) ...
     + (T_LR * sin(beta1c_LR) * cos(beta1s_LR) ...
     + T_UR * sin(beta1c_UR) * cos(beta1s_UR));
@@ -217,7 +229,7 @@ Y = m * g * sin(phi) * cos(theta) + Y_F - 2 * L_VT ...
 
 % 7.3 Z, Lateral Force
 Z = m * g * cos(phi) * cos(theta) ...
-    + D * sin(alpha_s) - L * cos(alpha_s) - L_HT ...
+    + D_F * sin(alpha_s) - L_F * cos(alpha_s) - L_HT ...
     - (H_LR * sin(beta1c_LR) + H_UR * sin(beta1c_UR)) ...
     - (Y_LR * sin(beta1s_LR) + Y_UR * sin(beta1s_UR)) ...
     - (T_LR * cos(beta1c_LR) * cos(beta1s_LR) ...
@@ -242,7 +254,7 @@ M = My_F + My_LR + My_UR - L_HT * l_HT + 2 * D_VT * h_VT + D_HT * h_HT ...
     + (H_UR * cos(beta1c_UR) - T_UR * sin(beta1c_UR) * cos(beta1s_UR)) * h_UR;
 
 % 7.6 N, Yawing moment
-N = -Q_diff - L_VT * l_VT - (2 * D_VT + D_HT) * y_CG ...
+N = Q_UR - Q_LR - L_VT * l_VT - (2 * D_VT + D_HT) * y_CG ...
     + ((T_LR * cos(beta1c_LR) * sin(beta1s_LR) ...
     + T_UR * cos(beta1c_UR) * sin(beta1s_UR)) ...
     - (Y_LR * cos(beta1s_LR) + Y_UR * cos(beta1s_UR))) * x_CG ...

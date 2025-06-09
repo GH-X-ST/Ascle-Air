@@ -9,10 +9,6 @@ function [c, ceq] = Nonlinear_H_C(x)
 %   x         - (theta_LR, theta_UR, theta_1s, theta_1c, phi, theta)
 %   theta_LR  - Lower rotor collective (rad)
 %   theta_UR  - Upper rotor collective (rad)
-%   theta_1s  - Longitudinal cyclic (rad)
-%   theta_1c  - Lateral cyclic (rad)
-%   phi       - Euler roll angle (rad)
-%   theta     - Euler pitch angle (rad)
 %
 % Outputs:
 %   c         - Inequality constriant
@@ -22,10 +18,6 @@ function [c, ceq] = Nonlinear_H_C(x)
 %   x         - (theta_LR, theta_UR, theta_1s, theta_1c, phi, theta)
 theta_LR  = x(1);
 theta_UR  = x(2);
-theta_1s  = x(3);
-theta_1c  = x(4);
-phi       = x(5);
-theta     = x(6);
 
 %   state     - [u, v, w, p, q, r, phi, theta, psi]
 %   u         - Forward velocity (m/s)
@@ -37,7 +29,7 @@ theta     = x(6);
 %   phi       - Euler roll angle (rad)
 %   theta     - Euler pitch angle (rad)
 %   psi       - Euler yaw angle (rad)
-state = [0, 0, 0, 0, 0, 0, phi, theta, 0];
+state = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 %   ctrl      - [theta_LR, theta_UR, theta_1s, theta_1c, delta_E, delta_R]
 %   theta_LR  - Lower rotor collective (rad)
@@ -46,7 +38,7 @@ state = [0, 0, 0, 0, 0, 0, phi, theta, 0];
 %   theta_1c  - Lateral cyclic (rad)
 %   delta_E   - Elevator deflection (rad)
 %   delta_R   - Rudder deflection (rad)
-ctrl = [theta_LR, theta_UR, theta_1s, theta_1c, 0, 0];
+ctrl = [theta_LR, theta_UR, 0, 0, 0, 0];
 
 %   params    - [h, m, g, z_R, z_HT, z_VT, x_HT, x_VT]
 %   h         - Altitude (m)
@@ -61,7 +53,7 @@ ctrl = [theta_LR, theta_UR, theta_1s, theta_1c, 0, 0];
 %               aerodynamic centre to shaft (m)
 %   x_VT      - Horizontal distance from vertical tailplane
 %               aerodynamic centre to shaft (m)
-params = [1524, 3500, 9.80665, 1, 0, 0, 5.5, 5.5];
+params = [1524, 3491, 9.80665, 1, 0, 0, 5.5, 5.5];
 
 %% 1 Calling function
 [X, Y, Z, L, M, N, ~, ~, ~, ~] = FM_N(state, ctrl, params);
