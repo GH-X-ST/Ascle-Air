@@ -148,13 +148,16 @@ D_VT = 0;      % Vertical tailplane drag (N)
 % 0.6 Initialize centre of gravity
 x_CG = 0;
 y_CG = 0;
-z_CG = 0;
+z_CG = 2.66847 - 1.3002;
 
 %% 1 Force arms
 
-theta_FP = atan2(w, u);
-
-alpha_s = theta_FP + theta;
+if u == 0 && w == 0
+  alpha_s = 0;   % no flight-path angle in pure hover
+else
+  theta_FP = atan2(w, u);
+  alpha_s  = theta_FP + theta;
+end
 
 h_UR = z_R + z_CG;
 
@@ -169,14 +172,17 @@ l_VT = x_CG + x_VT;
 l_HT = x_CG + x_HT;
 
 %% 2 International Standard Atmosphere model
-[~, ~, ~, rho, ~, ~] = atmosisa(h);
+[~, a, ~, rho, ~, mu] = atmosisa(h);
 
 %% 3 System & Structure Model
+I_xx = 5.4750e+03;
+I_yy = 3.2253e+04;
+I_zz = 2.6778e+04;
+I_xz = 1.0022e+04;
 
 %% 4 Rotor Aerodynamic Model
 
 % 4.1 Load airfoil data
-addpath('Airfoil');
 polar = loadPolarData('xf-rc410-il-1000000.txt');
 
 if abs(u) <= 5

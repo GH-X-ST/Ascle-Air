@@ -7,7 +7,7 @@ function [LVT,DVT] = FVT(u,v,w,rho,delR)
 % negative w while climbing
 % del R positive when airfoil points right (yaw left)
 
-HTl = 0.9; % Horizontail Tail length (airfoil chord length)
+HTl = 0.6; % Horizontail Tail length (airfoil chord length)
 HTt = HTl*0.15; % Horizontal Tail thickness
 VTl = HTl; % Vertical Tail length (airfoil chord length) SAME AS HTl
 VTw = 1; % Vertical Tail width (top to bottom length)

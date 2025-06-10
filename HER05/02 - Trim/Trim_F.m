@@ -31,7 +31,7 @@ function cost = Trim_F(theta_LR, theta_UR, theta_1s, theta_1c, phi, theta, delta
 %   phi       - Euler roll angle (rad)
 %   theta     - Euler pitch angle (rad)
 %   psi       - Euler yaw angle (rad)
-state = [0, 0, 0, 0, 0, 0, phi, theta, 0];
+state = [50, 0, 0, 0, 0, 0, phi, theta, 0];
 
 %   ctrl      - [theta_LR, theta_UR, theta_1s, theta_1c, delta_E, delta_R]
 %   theta_LR  - Lower rotor collective (rad)
@@ -55,7 +55,7 @@ ctrl = [theta_LR, theta_UR, theta_1s, theta_1c, delta_E, delta_R];
 %               aerodynamic centre to shaft (m)
 %   x_VT      - Horizontal distance from vertical tailplane
 %               aerodynamic centre to shaft (m)
-params = [1524, 3500, 9.80665, 1, 0, 0, 5.5, 5.5];
+params = [1524, 3491, 9.80665, 0.9, 0.682, 0.682, 5.5, 5.5];
 
 %% 1 Calling function
 [X, Y, Z, L, M, N, ~, ~, ~, ~] = FM_N(state, ctrl, params);

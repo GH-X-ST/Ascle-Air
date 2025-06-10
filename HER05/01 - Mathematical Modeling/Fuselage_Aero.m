@@ -36,6 +36,15 @@ CD_back = -0.208;
 V = sqrt(u^2 + v^2 + w^2);
 v_hat = [u, v, w] / V;
 
+if V < 1e-6
+    L_F  = 0;
+    D_F  = 0;
+    Y_F  = 0;
+    Mx_F = 0;
+    My_F = 0;
+    return
+end
+
 % Cosine of angle between velocity and +X-body
 cos_theta = u / V;
 
