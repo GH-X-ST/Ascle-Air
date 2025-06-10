@@ -1,0 +1,68 @@
+function [theta_LR, theta_UR] = H_C_fsolve(w)
+% Author:
+%   Hanchen Li (hl3422@ic.ac.uk)
+%
+% Inputs:
+%   u         - Forward flight velocity (m/s)
+%
+% Outputs:
+%   theta_LR  - Lower rotor collective (rad)
+%   theta_UR  - Upper rotor collective (rad)
+%   theta_1s  - Longitudinal cyclic (rad)
+%   theta_1c  - Lateral cyclic (rad)
+%   phi       - Euler roll angle (rad)
+%   theta     - Euler pitch angle (rad)
+%   delta_E   - Elevator deflection (rad)
+%   delta_R   - Rudder deflection (rad)
+%
+
+%% 0 Basic Parameters
+
+% 0.1 Initial guess
+x0 = [0.2788; 0.2323];
+
+% fsolve options
+opts = optimoptions('fsolve', ...
+    'Display','iter', ...
+    'FunctionTolerance',1e-8, ...
+    'StepTolerance',1e-8, ...
+    'MaxIterations',200);
+
+%% 2. Residual function
+
+function F = trimResiduals(x)
+    
+    params = [1524, 3491, 9.80665, 0.9, 0.682, 0.682, 5.5, 5.5];
+
+    % Unpack
+    theta_LR  = x(1);
+    theta_UR  = x(2);
+
+    % Build ctrl & state
+    ctrl  = [theta_LR, theta_UR, 0, 0, 0, 0];
+    state = [0, 0, w, 0, 0, 0, 0, 0, 0];
+
+    % Call your force-moment model
+    [X, Y, Z, L, M, N, ~, ~, ~, ~] = FM_N(state, ctrl, params);
+
+    % Residuals: forces & moments must be zero in steady trim
+    F = [X; Y; Z; L; M; N];
+end
+
+%% 3. Solve with fsolve
+[x_trim, ~, exitflag, output] = fsolve(@trimResiduals, x0, opts);
+
+if exitflag <= 0
+
+    warning('Trim did not converge (flag = %d)', exitflag);
+
+else
+    
+    fprintf('Converged in %d iterations.\n', output.iterations);
+end
+
+%% 4. Inspect solution
+theta_LR = x_trim(1);
+theta_UR = x_trim(2);
+
+end
