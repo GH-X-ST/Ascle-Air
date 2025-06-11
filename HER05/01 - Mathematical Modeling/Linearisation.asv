@@ -1,0 +1,122 @@
+function [A, B] = Linearisation(state, ctrl, params)
+% Introduction:
+%   This is the provisional linearisation code.
+%
+% Author:
+%   Hanchen Li (hl3422@ic.ac.uk)
+%
+% Inputs:
+%   state     - [u, v, w, p, q, r, phi, theta, psi]
+%   u         - Forward velocity (m/s)
+%   v         - Lateral velocity (m/s)
+%   w         - Vertical velocity (m/s)
+%   p         - Roll rate (rad/s)
+%   q         - Pitch rate (rad/s)
+%   r         - Yaw rate (rad/s)
+%   phi       - Euler roll angle (rad)
+%   theta     - Euler pitch angle (rad)
+%   psi       - Euler yaw angle (rad)
+%
+%   ctrl      - [theta_LR, theta_UR, theta_1s, theta_1c, delta_E, delta_R]
+%   theta_LR  - Lower rotor collective (rad)
+%   theta_UR  - Upper rotor collective (rad)
+%   theta_1s  - Longitudinal cyclic (rad)
+%   theta_1c  - Lateral cyclic (rad)
+%   delta_E   - Elevator deflection (rad)
+%   delta_R   - Rudder deflection (rad)
+%
+%   params    - [h, m, g, z_R, z_HT, z_VT, x_HT, x_VT]
+%   h         - Altitude (m)
+%   m         - Mass (kg)
+%   g         - Acceleration of gravity (m s^-2)
+%   z_R       - Vertical distance between upper rotor and lower rotor (m)
+%   z_HT      - Vertical distance from horizontal tailplane aerodynamic
+%               centre to the lower rotor hub (+ve below) (m)
+%   z_VT      - Vertical distance from vertical tailplane aerodynamic
+%               centre to the lower rotor hub (+ve below) (m)
+%   x_HT      - Horizontal distance from horizontal tailplane
+%               aerodynamic centre to shaft (m)
+%   x_VT      - Horizontal distance from vertical tailplane
+%               aerodynamic centre to shaft (m)
+%
+% Outputs:
+%   A         - System matrix (9x9)
+%   B         - Control matrix (6x9)
+
+%% 0 Basic Parameters
+
+% 0.0 Setup
+delta = 1e-4;   % finite-difference step size (tunable for accuracy)
+nx = length(state);
+nu = length(ctrl);
+A = zeros(nx, nx);
+B = zeros(nx, nu);
+
+% 0.1 Extract parameters
+% state - [u, v, w, p, q, r, phi, theta, psi]
+u = state(1);
+v = state(2);
+w = state(3);
+p = state(4);
+q = state(5);
+r = state(6);
+phi = state(7);
+theta = state(8);
+psi = state(9);
+
+% ctrl - [theta_LR, theta_UR, theta_1s, theta_1c, delta_E, delta_R]
+theta_LR = ctrl(1);
+theta_UR = ctrl(2);
+theta_1s = ctrl(3);
+theta_1c = ctrl(4);
+delta_E = ctrl(5);
+delta_R = ctrl(6);
+
+theta_0 = 0.5 * (theta_LR + theta_UR);
+theta_diff = 0.5 * (theta_UR - theta_LR);
+
+% params - [h, m, g, z_R, z_HT, z_VT, x_HT, x_VT]
+h = params(1);
+m = params(2);
+g = params(3);
+z_R = params(4);
+z_HT = params(5);
+z_VT = params(6);
+x_HT = params(7);
+x_VT = params(8);
+
+%% 1 Calculate force and moments
+
+[X, Y, Z, L, M, N, I_xx, I_yy, I_zz, I_xz] = FM(state, ctrl, params);
+
+%% 2 Calculate derivative terms
+
+% 2.1 Calculate xdot
+
+udot = -(w * q - v * r) + X / m - g * sin(theta);
+vdot = -(u * r - w * p) + Y / m + g * cos(theta) * sin(phi);
+wdot = -(v * p - u * q) + Z / m + g * cos(theta) * cos(phi);
+
+I = [I_xx, 0,   -I_xz;
+     0,   I_yy,  0;
+    -I_xz, 0,    I_zz];
+
+omega = [p; q; r];
+Mvec  = [L; M; N];
+
+omega_dot = I \ ( Mvec - cross(omega, I * omega) );
+
+pdot = omega_dot(1);
+qdot = omega_dot(2);
+rdot = omega_dot(3);
+
+phidot = p + q * sin(phi) * tan(theta) + r *  cos(phi) * tan(theta);
+thetadot = q * cos(phi) - r * sin(phi);
+psidot = q * sin(phi) * sec(theta) + r * cos(phi) * sec(theta);
+
+% 2.2 Cast into vector
+xdot = [udot vdot wdot pdot qdot rdot phidot thetadot psidot];
+
+
+end
+
