@@ -7,7 +7,7 @@ function [emax,W1,W2,Cinf] = optimise_compensators(P,LoopShape_bounds,Weight_bou
 % post-multiplies it to form the shaped plant.
 %
 % This script has been updated for modern MATLAB versions (R2016b and later)
-% and requires the Robust Control Toolbox and System Identification Toolbox.
+% and requires the Robust Control Toolbox and System Identification Toolbox. 
 % Original script by Alexander Lanzon - 17 July 2000.
 %
 % USAGE  :  [emax,W1,W2,Cinf] = simWCsyn_HinfLoopShaping_updated(P,LoopShape_bounds, ...
@@ -70,15 +70,15 @@ end
 
 %% Checking and setting optional inputs
 if (nargin < 3) || isempty(Weight_bounds)
-   
-    Weight_bounds = [1e10 1; 1e-10 1];
+    Weight_bounds = [ss(1e10) ss(1); ss(1e-10) ss(1)];
 end
+
 % if ~isequal(size(Weight_bounds), [2,2])
 %     error('Variable "Weight_bounds" not properly defined.');
 % end
 
 if (nargin < 4) || isempty(CondNo_bounds)
-    CondNo_bounds = [20 20];
+    CondNo_bounds = [ss(20) ss(20)];
 end
 if ~isequal(size(CondNo_bounds), [1,2])
     error('Variable "CondNo_bounds" not properly defined.');
@@ -133,30 +133,60 @@ P_fr = freqresp(P, omega);
 LoopShape_upper_fr = abs(squeeze(freqresp(LoopShape_bounds(1,1), omega)));
 LoopShape_lower_fr = abs(squeeze(freqresp(LoopShape_bounds(2,1), omega)));
 
+% figure(1);
+% hax1 = gca;
+% semilogx(hax1, omega)%, NaN, 'b-'); % Placeholder for handle
+% hold(hax1, 'on');
+% 
+% % hold on
+% xlabel(hax1, 'Frequency (radians/sec)');
+% ylabel(hax1, 'Pointwise Robust Stability Margin');
+% axis(hax1, [omega(1) omega(end) 0 1]);
+% grid(hax1, 'on');
+% zoom(hax1, 'on');
+% title(hax1, 'Robust Stability Margin');
+% hold(hax1, 'off');
+
 figure(1);
-hax1 = gca;
-semilogx(hax1, omega, NaN, 'b-'); % Placeholder for handle
-hold(hax1, 'on');
-xlabel(hax1, 'Frequency (radians/sec)');
-ylabel(hax1, 'Pointwise Robust Stability Margin');
-axis(hax1, [omega(1) omega(end) 0 1]);
-grid(hax1, 'on');
-zoom(hax1, 'on');
-title(hax1, 'Robust Stability Margin');
-hold(hax1, 'off');
+% No need to plot a placeholder, as the loop will clear and draw the real data.
+% Just set up the labels and properties for the initial view.
+xlabel('Frequency (radians/sec)');
+ylabel('Pointwise Robust Stability Margin');
+title('Robust Stability Margin');
+axis([omega(1) omega(end) 0 1]);
+grid on;
+zoom on;
+
+% figure(2);
+% hax2 = gca;
+% loglog(hax2, omega, LoopShape_upper_fr, '--', omega, LoopShape_lower_fr, '--');
+% hold(hax2, 'on');
+% loglog(hax2, omega, ones(size(omega)), ':');
+% sigma(P, omega); % Plots singular values of P
+% hold(hax2, 'off');
+% xlabel(hax2, 'Frequency (radians/sec)');
+% ylabel(hax2, 'Singular Values');
+% title(hax2, 'Nominal Plant Singular Values & Loop-Shape Boundaries');
+% grid(hax2, 'on');
+% zoom(hax2, 'on');
 
 figure(2);
-hax2 = gca;
-loglog(hax2, omega, LoopShape_upper_fr, '--', omega, LoopShape_lower_fr, '--');
-hold(hax2, 'on');
-loglog(hax2, omega, ones(size(omega)), ':');
-sigma(P, omega); % Plots singular values of P
-hold(hax2, 'off');
-xlabel(hax2, 'Frequency (radians/sec)');
-ylabel(hax2, 'Singular Values');
-title(hax2, 'Nominal Plant Singular Values & Loop-Shape Boundaries');
-grid(hax2, 'on');
-zoom(hax2, 'on');
+% Manually calculate the singular values of the plant P instead of plotting directly.
+sv_P = sigma(P, omega);
+
+% Plot all data series in a single, robust loglog command.
+loglog(omega, LoopShape_upper_fr, 'r--', ...
+       omega, LoopShape_lower_fr, 'r--', ...
+       omega, ones(size(omega)), 'k:', ...
+       omega, sv_P, 'b-');
+
+% Add labels and formatting.
+title('Nominal Plant Singular Values & Loop-Shape Boundaries');
+xlabel('Frequency (radians/sec)');
+ylabel('Singular Values');
+legend('Upper Bound', 'Lower Bound', 'Unity Gain', 'Plant SVs', 'Location', 'best');
+grid on;
+zoom on;
 
 
 figure(3);
@@ -229,60 +259,221 @@ while ~strcmpi(flag,'exit')
     Ps = minreal(Ps, sqrt(eps));
 
     % Plotting graphs after W-iteration
-    figure(2);
-    hax2 = gca; cla(hax2);
-    loglog(hax2, omega, LoopShape_upper_fr, '--', omega, LoopShape_lower_fr, '--');
-    hold(hax2, 'on');
-    loglog(hax2, omega, ones(size(omega)), ':');
-    sigma(Ps, omega, 'b-'); % Plot new shaped plant SVs
-    hold(hax2, 'off');
-    title(hax2, 'Singular Values of Shaped Plant');
-    grid(hax2, 'on');
+    % --- This is the NEW, corrected block for updating figure(2) inside the loop ---
+    % It should be placed after the line 'Ps = W2_tmp * P * W1_tmp;'
     
+    figure(2);
+    clf; % Clear the figure. This handles cases where the window was closed.
+    
+    % Manually calculate the singular values of the *shaped* plant Ps.
+    sv_Ps = sigma(Ps, omega);
+    
+    % Plot all data series in a single, robust loglog command.
+    % Note: We re-plot the bounds on each iteration for clarity.
+    loglog(omega, LoopShape_upper_fr, 'r--', ...
+           omega, LoopShape_lower_fr, 'r--', ...
+           omega, ones(size(omega)), 'k:', ...
+           omega, sv_Ps, 'b-');
+    
+    % Add labels and formatting.
+    title('Singular Values of Shaped Plant');
+    xlabel('Frequency (radians/sec)');
+    ylabel('Singular Values');
+    legend('Upper Bound', 'Lower Bound', 'Unity Gain', 'Shaped Plant SVs', 'Location', 'best');
+    grid on;
+    zoom on;
+    
+    % Optional: Restore the original axis limits if you have them defined
+    % For example:
+    % loopshape_upper_axis_limit = ...
+    % loopshape_lower_axis_limit = ...
+    % axis([omega(1) omega(end) loopshape_lower_axis_limit loopshape_upper_axis_limit]);
+   
+    % figure(2);
+    % hax2 = gca; cla(hax2);
+    % loglog(hax2, omega, LoopShape_upper_fr, '--', omega, LoopShape_lower_fr, '--');
+    % hold(hax2, 'on');
+    % loglog(hax2, omega, ones(size(omega)), ':');
+    % sigma(Ps, omega, 'b-'); % Plot new shaped plant SVs
+    % hold(hax2, 'off');
+    % title(hax2, 'Singular Values of Shaped Plant');
+    % grid(hax2, 'on');
+    
+    % figure(3);
+    % if W1_bounds_FLAG
+    %     subplot(1,1,1); cla;
+    %     bodemag(Weight_bounds(1,2), '--', Weight_bounds(2,2), '--', {omega(1), omega(end)}); hold on;
+    %     sigma(W2_tmp, 'b-', {omega(1), omega(end)}); hold off; title('Singular Values of W_2');
+    % elseif W2_bounds_FLAG
+    %     subplot(1,1,1); cla;
+    %     bodemag(Weight_bounds(1,1), '--', Weight_bounds(2,1), '--', {omega(1), omega(end)}); hold on;
+    %     size({omega(1), omega(end)})
+    %     sigma(W1_tmp, 'b-', {omega(1), omega(end)}); hold off; title('Singular Values of W_1');
+    % else
+    %     subplot(2,1,1); cla;
+    %     bodemag(Weight_bounds(1,1), '--', Weight_bounds(2,1), '--', {omega(1), omega(end)}); hold on;
+    %     sigma(W1_tmp, 'b-', {omega(1), omega(end)}); hold off; title('Singular Values of W_1');
+    % 
+    %     subplot(2,1,2); cla;
+    %     bodemag(Weight_bounds(1,2), '--', Weight_bounds(2,2), '--', {omega(1), omega(end)}); hold on;
+    %     sigma(W2_tmp, 'b-', {omega(1), omega(end)}); hold off; title('Singular Values of W_2');
+    % end
+    % --- This is the NEW, corrected block ---
     figure(3);
     if W1_bounds_FLAG
-        subplot(1,1,1); cla;
-        bodemag(Weight_bounds(1,2), '--', Weight_bounds(2,2), '--', {omega(1), omega(end)}); hold on;
-        sigma(W2_tmp, 'b-', {omega(1), omega(end)}); hold off; title('Singular Values of W_2');
-    elseif W2_bounds_FLAG
-        subplot(1,1,1); cla;
-        bodemag(Weight_bounds(1,1), '--', Weight_bounds(2,1), '--', {omega(1), omega(end)}); hold on;
-        sigma(W1_tmp, 'b-', {omega(1), omega(end)}); hold off; title('Singular Values of W_1');
-    else
-        subplot(2,1,1); cla;
-        bodemag(Weight_bounds(1,1), '--', Weight_bounds(2,1), '--', {omega(1), omega(end)}); hold on;
-        sigma(W1_tmp, 'b-', {omega(1), omega(end)}); hold off; title('Singular Values of W_1');
+        % Plot W2 against its bounds
+        h_ax = subplot(1,1,1);
+        cla(h_ax);
         
-        subplot(2,1,2); cla;
-        bodemag(Weight_bounds(1,2), '--', Weight_bounds(2,2), '--', {omega(1), omega(end)}); hold on;
-        sigma(W2_tmp, 'b-', {omega(1), omega(end)}); hold off; title('Singular Values of W_2');
+        % Get frequency response data for bounds and singular value data for W2
+        mag_upper = abs(squeeze(freqresp(Weight_bounds(1,2), omega)));
+        mag_lower = abs(squeeze(freqresp(Weight_bounds(2,2), omega)));
+        sv_w = sigma(W2_tmp, omega);
+        
+        % Use loglog for manual plotting
+        loglog(h_ax, omega, mag_upper, 'r--', omega, mag_lower, 'r--', omega, sv_w, 'b-');
+        grid(h_ax, 'on');
+        title(h_ax, 'Singular Values of W_2');
+        xlabel(h_ax, 'Frequency (rad/s)');
+        ylabel(h_ax, 'Magnitude');
+        
+    elseif W2_bounds_FLAG
+        % Plot W1 against its bounds
+        h_ax = subplot(1,1,1);
+        cla(h_ax);
+        
+        % Get frequency response data for bounds and singular value data for W1
+        mag_upper = abs(squeeze(freqresp(Weight_bounds(1,1), omega)));
+        mag_lower = abs(squeeze(freqresp(Weight_bounds(2,1), omega)));
+        sv_w = sigma(W1_tmp, omega);
+        
+        % Use loglog for manual plotting
+        loglog(h_ax, omega, mag_upper, 'r--', omega, mag_lower, 'r--', omega, sv_w, 'b-');
+        grid(h_ax, 'on');
+        title(h_ax, 'Singular Values of W_1');
+        xlabel(h_ax, 'Frequency (rad/s)');
+        ylabel(h_ax, 'Magnitude');
+        
+    else
+        % Plot W1 against its bounds in the top subplot
+        h_ax1 = subplot(2,1,1);
+        cla(h_ax1);
+        mag_upper1 = abs(squeeze(freqresp(Weight_bounds(1,1), omega)));
+        mag_lower1 = abs(squeeze(freqresp(Weight_bounds(2,1), omega)));
+        sv_w1 = sigma(W1_tmp, omega);
+        loglog(h_ax1, omega, mag_upper1, 'r--', omega, mag_lower1, 'r--', omega, sv_w1, 'b-');
+        grid(h_ax1, 'on');
+        title(h_ax1, 'Singular Values of W_1');
+        xlabel(h_ax1, 'Frequency (rad/s)');
+        ylabel(h_ax1, 'Magnitude');
+    
+        % Plot W2 against its bounds in the bottom subplot
+        h_ax2 = subplot(2,1,2);
+        cla(h_ax2);
+        mag_upper2 = abs(squeeze(freqresp(Weight_bounds(1,2), omega)));
+        mag_lower2 = abs(squeeze(freqresp(Weight_bounds(2,2), omega)));
+        sv_w2 = sigma(W2_tmp, omega);
+        loglog(h_ax2, omega, mag_upper2, 'r--', omega, mag_lower2, 'r--', omega, sv_w2, 'b-');
+        grid(h_ax2, 'on');
+        title(h_ax2, 'Singular Values of W_2');
+        xlabel(h_ax2, 'Frequency (rad/s)');
+        ylabel(h_ax2, 'Magnitude');
     end
 
+    % figure(4);
+    % if W1_bounds_FLAG
+    %     subplot(1,1,1); cla;
+    %     semilogx(omega, abs(squeeze(freqresp(CondNo_bounds(1,2),omega))),'--'); hold on;
+    %     semilogx(omega, ones(size(omega)),'--');
+    %     semilogx(omega, cond(freqresp(W2_tmp,omega)),'b-'); hold off;
+    %     title('Condition Number of W_2');
+    % elseif W2_bounds_FLAG
+    %      subplot(1,1,1); cla;
+    %     semilogx(omega, abs(squeeze(freqresp(CondNo_bounds(1,1),omega))),'--'); hold on;
+    %     semilogx(omega, ones(size(omega)),'--');
+    %     semilogx(omega, cond(freqresp(W1_tmp,omega)),'b-'); hold off;
+    %     title('Condition Number of W_1');
+    % else
+    %     subplot(2,1,1); cla;
+    %     semilogx(omega, abs(squeeze(freqresp(CondNo_bounds(1,1),omega))),'--'); hold on;
+    %     semilogx(omega, ones(size(omega)),'--');
+    %     semilogx(omega, cond(freqresp(W1_tmp,omega)),'b-'); hold off;
+    %     title('Condition Number of W_1');
+    % 
+    %     subplot(2,1,2); cla;
+    %     semilogx(omega, abs(squeeze(freqresp(CondNo_bounds(1,2),omega))),'--'); hold on;
+    %     semilogx(omega, ones(size(omega)),'--');
+    %     semilogx(omega, cond(freqresp(W2_tmp,omega)),'b-'); hold off;
+    %     title('Condition Number of W_2');
+    % end
+    % --- This is the NEW, corrected block ---
     figure(4);
     if W1_bounds_FLAG
-        subplot(1,1,1); cla;
-        semilogx(omega, abs(squeeze(freqresp(CondNo_bounds(1,2),omega))),'--'); hold on;
-        semilogx(omega, ones(size(omega)),'--');
-        semilogx(omega, cond(freqresp(W2_tmp,omega)),'b-'); hold off;
-        title('Condition Number of W_2');
-    elseif W2_bounds_FLAG
-         subplot(1,1,1); cla;
-        semilogx(omega, abs(squeeze(freqresp(CondNo_bounds(1,1),omega))),'--'); hold on;
-        semilogx(omega, ones(size(omega)),'--');
-        semilogx(omega, cond(freqresp(W1_tmp,omega)),'b-'); hold off;
-        title('Condition Number of W_1');
-    else
-        subplot(2,1,1); cla;
-        semilogx(omega, abs(squeeze(freqresp(CondNo_bounds(1,1),omega))),'--'); hold on;
-        semilogx(omega, ones(size(omega)),'--');
-        semilogx(omega, cond(freqresp(W1_tmp,omega)),'b-'); hold off;
-        title('Condition Number of W_1');
+        % Plot condition number of W2
+        h_ax = subplot(1,1,1);
+        cla(h_ax);
         
-        subplot(2,1,2); cla;
-        semilogx(omega, abs(squeeze(freqresp(CondNo_bounds(1,2),omega))),'--'); hold on;
-        semilogx(omega, ones(size(omega)),'--');
-        semilogx(omega, cond(freqresp(W2_tmp,omega)),'b-'); hold off;
-        title('Condition Number of W_2');
+        % Calculate condition number by looping through frequencies
+        W2_fr = freqresp(W2_tmp, omega);
+        k_W2 = zeros(1, length(omega));
+        for k = 1:length(omega)
+            k_W2(k) = cond(W2_fr(:,:,k));
+        end
+        
+        % Plot bounds and the result
+        bound_k2 = abs(squeeze(freqresp(CondNo_bounds(1,2), omega)));
+        semilogx(h_ax, omega, bound_k2, 'r--', omega, ones(size(omega)), 'k--', omega, k_W2, 'b-');
+        grid(h_ax, 'on');
+        title(h_ax, 'Condition Number of W_2');
+        xlabel(h_ax, 'Frequency (rad/s)');
+        ylabel(h_ax, 'Condition Number');
+        
+    elseif W2_bounds_FLAG
+        % Plot condition number of W1
+        h_ax = subplot(1,1,1);
+        cla(h_ax);
+        
+        % Calculate condition number by looping through frequencies
+        W1_fr = freqresp(W1_tmp, omega);
+        k_W1 = zeros(1, length(omega));
+        for k = 1:length(omega)
+            k_W1(k) = cond(W1_fr(:,:,k));
+        end
+        
+        % Plot bounds and the result
+        bound_k1 = abs(squeeze(freqresp(CondNo_bounds(1,1), omega)));
+        semilogx(h_ax, omega, bound_k1, 'r--', omega, ones(size(omega)), 'k--', omega, k_W1, 'b-');
+        grid(h_ax, 'on');
+        title(h_ax, 'Condition Number of W_1');
+        xlabel(h_ax, 'Frequency (rad/s)');
+        ylabel(h_ax, 'Condition Number');
+        
+    else
+        % Plot condition number of W1 in the top subplot
+        h_ax1 = subplot(2,1,1);
+        cla(h_ax1);
+        W1_fr = freqresp(W1_tmp, omega);
+        k_W1 = zeros(1, length(omega));
+        for k = 1:length(omega), k_W1(k) = cond(W1_fr(:,:,k)); end
+        bound_k1 = abs(squeeze(freqresp(CondNo_bounds(1,1), omega)));
+        semilogx(h_ax1, omega, bound_k1, 'r--', omega, ones(size(omega)), 'k--', omega, k_W1, 'b-');
+        grid(h_ax1, 'on');
+        title(h_ax1, 'Condition Number of W_1');
+        xlabel(h_ax1, 'Frequency (rad/s)');
+        ylabel(h_ax1, 'Condition Number');
+    
+        % Plot condition number of W2 in the bottom subplot
+        h_ax2 = subplot(2,1,2);
+        cla(h_ax2);
+        W2_fr = freqresp(W2_tmp, omega);
+        k_W2 = zeros(1, length(omega));
+        for k = 1:length(omega), k_W2(k) = cond(W2_fr(:,:,k)); end
+        bound_k2 = abs(squeeze(freqresp(CondNo_bounds(1,2), omega)));
+        semilogx(h_ax2, omega, bound_k2, 'r--', omega, ones(size(omega)), 'k--', omega, k_W2, 'b-');
+        grid(h_ax2, 'on');
+        title(h_ax2, 'Condition Number of W_2');
+        xlabel(h_ax2, 'Frequency (rad/s)');
+        ylabel(h_ax2, 'Condition Number');
     end
     drawnow;
     pause(0.5);
@@ -306,28 +497,43 @@ while ~strcmpi(flag,'exit')
 
 
     % Plotting graphs after Controller Synthesis
+    % figure(1);
+    % hax1 = gca;
+    % cla(hax1);
+    % semilogx(hax1, omega, margin_at_freq, 'b-');
+    % hold(hax1, 'on');
+    % semilogx(hax1, omega, rho_W_iter, 'r:'); % Show margin from W-iteration
+    % hold(hax1, 'off');
+    % legend(hax1, 'After Controller Synthesis', 'Target from W-iteration', 'Location', 'best');
+    % xlabel(hax1, 'Frequency (radians/sec)');
+    % ylabel(hax1, 'Pointwise Robust Stability Margin');
+    % axis(hax1, [omega(1) omega(end) 0 1]);
+    % grid(hax1, 'on');
     figure(1);
-    hax1 = gca;
-    cla(hax1);
-    semilogx(hax1, omega, margin_at_freq, 'b-');
-    hold(hax1, 'on');
-    semilogx(hax1, omega, rho_W_iter, 'r:'); % Show margin from W-iteration
-    hold(hax1, 'off');
-    legend(hax1, 'After Controller Synthesis', 'Target from W-iteration', 'Location', 'best');
-    xlabel(hax1, 'Frequency (radians/sec)');
-    ylabel(hax1, 'Pointwise Robust Stability Margin');
-    axis(hax1, [omega(1) omega(end) 0 1]);
-    grid(hax1, 'on');
-
+    clf; % Clear the entire figure for a robust, clean slate.
+    
+    % Plot both lines in a single command. MATLAB handles the overlay automatically.
+    semilogx(omega, margin_at_freq, 'b-', omega, rho_W_iter, 'r:');
+    
+    % Add formatting to the current axes.
+    legend('After Controller Synthesis', 'Target from W-iteration', 'Location', 'best');
+    xlabel('Frequency (radians/sec)');
+    ylabel('Pointwise Robust Stability Margin');
+    axis([omega(1) omega(end) 0 1]);
+    grid on;
+      
     figure(5);
-    hax5 = gca;
-    cla(hax5);
+    clf; % Clears the entire figure, which is more robust than clearing just the axes.
+    
+    % The sigma command will now create fresh axes on the cleared figure.
     sigma(Cinf_tmp, 'b-', {omega(1), omega(end)});
-    title(hax5, 'Singular Values of Controller C_\infty');
-    grid(hax5, 'on');
+    
+    % The title command will automatically apply to the newly created axes.
+    title('Singular Values of Controller C_\infty');
+    grid on;
     drawnow;
     pause(0.5);
-    
+
     fprintf('\n\n--- Iteration %d successfully completed! ---\n', ii);
     fprintf('Robust stability margin achieved: %.4f\n', emaxC_tmp(ii));
     
@@ -640,16 +846,19 @@ if (tall == 1), a1 = '1'; a2 = '2'; else, a1 = '2'; a2 = '1'; end
 W1_bounds_FLAG = norm(getPeakGain(Weight_bounds(:,1) - [1;1])) == 0;
 W2_bounds_FLAG = norm(getPeakGain(Weight_bounds(:,2) - [1;1])) == 0;
 
+
 if W1_bounds_FLAG
     D1 = eye(n);
 else
     D1_cells = cell(1,n);
+   
     for kk = 1:n
         fprintf('\nFitting D_%s (%d,%d)\n', a1, kk, kk);
         mag_data = frd(modD1(kk,:).', omega);
         D1_cells{kk} = fitmag_updated(mag_data);
     end
-    D1 = diag(cell2mat(D1_cells));
+    % D1 = diag(cell2mat(D1_cells));  % cell2mat does not support cell arrays of cell arrays
+    D1 = blkdiag(D1_cells{:});
 end
 
 if W2_bounds_FLAG
@@ -677,37 +886,102 @@ decvarsOUT = decvarsOUT_tmp;
 end
 
 %--------------------------------------------------------------------------
+% function W = spectfact_updated(G)
+% % Performs spectral factorization W*W' = G*G' using CARE.
+% % G is the system to be factorized. W is the stable, minimum-phase factor.
+% if isempty(G) || norm(G) == 0
+%     W = G; return;
+% end
+% 
+% disp("hi")
+% G = minreal(ss(G))
+% disp("hi22")
+% [A,B,C,D] = ssdata(G)
+% R = D'*D;
+% Q = C'*C;
+% S = C'*D;
+% 
+% % Solve the Algebraic Riccati Equation for factorization
+% % A'X + XA - (XB+S)R^-1(B'X+S') + Q = 0
+% [X, K, ~] = icare(A, B, Q, R, S);
+% 
+% % The spectral factor W has the form: W = ss(A-B*K, B, C-D*K, D)
+% % However, we need to ensure the D matrix of the factor is Cholesky of original R
+% 
+% L = chol(R, 'lower');
+% W = ss(A, B, (C-D*pinv(R)*(B'*X+S')), L);
+% W = minreal(W, sqrt(eps));
+% end
 function W = spectfact_updated(G)
-% Performs spectral factorization W*W' = G*G' using CARE.
-% G is the system to be factorized. W is the stable, minimum-phase factor.
+% Performs spectral factorization W'*W = G'*G using CARE, where W is a
+% stable, minimum-phase factor.
+% G is the system to be factorized.
+% This updated version correctly handles both strictly proper (D=0) and
+% proper (D~=0) systems.
+
 if isempty(G) || norm(G) == 0
-    W = G; return;
+    W = G;
+    return;
 end
 
 G = minreal(ss(G));
 [A,B,C,D] = ssdata(G);
-R = D'*D;
-Q = C'*C;
-S = C'*D;
 
-% Solve the Algebraic Riccati Equation for factorization
-% A'X + XA - (XB+S)R^-1(B'X+S') + Q = 0
-[X, ~, K] = care(A, B, Q, R, S);
+% Check if the system is strictly proper (D matrix is effectively zero)
+if norm(D, 'fro') < sqrt(eps)
+    % --- STRICTLY PROPER CASE (D = 0) ---
+    % The spectral factor W will also be strictly proper.
+    % We solve the simplified Riccati equation: A'X + XA - XBB'X + C'C = 0.
+    
+    Q = C'*C;
+    % Use the standard CARE solver for this simplified form
+    [X, ~, ~] = care(A, B, Q);
 
-% The spectral factor W has the form: W = ss(A-B*K, B, C-D*K, D)
-% However, we need to ensure the D matrix of the factor is Cholesky of original R
-L = chol(R, 'lower');
-W = ss(A, B, (C-D*pinv(R)*(B'*X+S')), L);
-W = minreal(W, sqrt(eps));
+    % The output matrix of the spectral factor W is L = B'*X
+    L = B'*X;
+    
+    % The factor W is ss(A, B, L, D_w), where D_w must be zero.
+    output_dim = size(L, 1);
+    input_dim = size(B, 2);
+    W = ss(A, B, L, zeros(output_dim, input_dim));
+
+else
+    % --- PROPER CASE (D ~= 0) ---
+    % This assumes D'*D is invertible (i.e., G has no zeros on the jw-axis).
+    R = D'*D;
+    Q = C'*C;
+    S = C'*D;
+
+    % Check for singularity of R before proceeding.
+    % rcond is a good way to check if a matrix is close to singular.
+    if rcond(R) < 1e-12
+         error('Spectral factorization failed: D''*D is singular or ill-conditioned. The system may have jw-axis zeros.');
+    end
+
+    % Solve the general continuous-time Algebraic Riccati Equation (CARE)
+    % A'X + XA - (XB+S)R^-1(B'X+S') + Q = 0
+    [X, ~, K] = care(A, B, Q, R, S); % K is the gain R^-1 * (B'X + S')
+
+    % The Cholesky factor of R is the feedthrough matrix of the spectral factor W.
+    % We use 'lower' to be consistent.
+    L = chol(R, 'lower');
+
+    % The spectral factor is W(s) = L + K * (sI - A)^-1 * B.
+    % The state-space realization for this is:
+    W = ss(A, B, K, L);
 end
 
+% Ensure the final result is a minimal realization.
+W = minreal(W, sqrt(eps));
+end
 %--------------------------------------------------------------------------
 function sys = fitmag_updated(mag_frd)
 % Interactively fits a transfer function to magnitude data.
 % Replaces the non-standard `fitmag` function.
 flag = 'y';
 h_fit_fig = figure;
-loglog(mag_frd.Frequency, mag_frd.ResponseData, 'y.');
+% loglog(mag_frd.Frequency, mag_frd.ResponseData, 'y.');
+loglog(mag_frd.Frequency(:, 1), squeeze(mag_frd.ResponseData(1, 1, :)), 'y.');
 hold on; grid on;
 title('Fit Magnitude Data');
 xlabel('Frequency (rad/s)'); ylabel('Magnitude');
