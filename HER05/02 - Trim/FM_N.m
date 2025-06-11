@@ -150,7 +150,7 @@ D_VT = 0;      % Vertical tailplane drag (N)
 % MTOW
 % x_CG = 3.2599 - 3.2496;
 % y_CG = 0;
-z_CG = 2.66847 - 1.2354;
+% z_CG = 2.66847 - 1.2354;
 
 % MFZW
 % x_CG = 3.2599 - 3.2010;
@@ -166,7 +166,7 @@ z_CG = 2.66847 - 1.2354;
 % average mass, CG and moment of inertia during patient transport
 x_CG = 0;
 y_CG = 0;
-% z_CG = 2.66847 - 1.3532;
+z_CG = 2.66847 - 1.3532;
 
 %% 1 Force arms
 

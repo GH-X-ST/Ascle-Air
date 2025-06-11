@@ -146,14 +146,32 @@ D_HT = 0;      % Horzizontal tailplane drag (N)
 D_VT = 0;      % Vertical tailplane drag (N)
 
 % 0.6 Initialize centre of gravity
+
+% MTOW
+% x_CG = 3.2599 - 3.2496;
+% y_CG = 0;
+% z_CG = 2.66847 - 1.2354;
+
+% MFZW
+% x_CG = 3.2599 - 3.2010;
+% y_CG = 0;
+% z_CG = 2.66847 - 1.4454;
+
+% Maximum Fuel with Zero Payload
+% x_CG = 3.2599 - 3.1349;
+% y_CG = 0;
+% z_CG = 2.66847 - 1.2687;
+
+% Linearization Point
+% average mass, CG and moment of inertia during patient transport
 x_CG = 0;
 y_CG = 0;
-z_CG = 0;
+z_CG = 2.66847 - 1.3532;
 
 %% 1 Force arms
 
 if u == 0 && w == 0
-  alpha_s = 0;
+  alpha_s = 0;   % no flight-path angle in pure hover
 else
   theta_FP = atan2(w, u);
   alpha_s  = theta_FP + theta;
@@ -175,12 +193,33 @@ l_HT = x_CG + x_HT;
 [~, a, ~, rho, ~, mu] = atmosisa(h);
 
 %% 3 System & Structure Model
-I_xx = 5.4750e+03;
-I_yy = 3.2253e+04;
-I_zz = 2.6778e+04;
-I_xz = 1.0022e+04;
 
-%% 4 Rotor Aerodynamics & Dynamics Model
+% MTOW
+% I_xx = 5.9503e+03;
+% I_yy = 4.0466e+04;
+% I_zz = 3.4703e+04;
+% I_xz = 1.2291e+04;
+
+% MFZW
+% I_xx = 5.7107e+03;
+% I_yy = 3.2135e+04;
+% I_zz = 2.6611e+04;
+% I_xz = 1.0898e+04;
+
+% Maximum Fuel with Zero Payload
+% I_xx = 5.2058e+03;
+% I_yy = 3.0526e+04;
+% I_zz = 2.5451e+04;
+% I_xz = 9.8181e+03;
+
+% Linearization Point
+% average mass, CG and moment of inertia during patient transport
+I_xx = 5.6409e+03;
+I_yy = 3.4489e+04;
+I_zz = 2.8995e+04;
+I_xz = 1.1102e+04;
+
+%% 4 Rotor Aerodynamic Model
 
 % 4.1 Load airfoil data
 polar = loadPolarData('xf-rc410-il-1000000.txt');
@@ -209,15 +248,16 @@ else
 
 end
 
-%% 5 Fuselage Aerodynamics Model
+%% 5 Fuselage Aerodynamic Model
 [L_F, D_F, Y_F, Mx_F, My_F] = Fuselage_Aero(u, v, w, rho);
 
-%% 6 Empennage Aerodynamics Model
+%% 6 Empennage Aerodynamic Model
 % 6.1 Horizontal tailplane
 [L_HT, D_HT] = FHT(u, v, w, rho, delta_E);
 
 % 6.1 Vertical tailplane
 [L_VT, D_VT] = FVT(u, v, w, rho, delta_R);
+
 
 %% 7 Forces and Moments
 % 7.1 X, Logitudinal Force
