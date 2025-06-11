@@ -150,12 +150,12 @@ D_VT = 0;      % Vertical tailplane drag (N)
 % MTOW
 % x_CG = 3.2599 - 3.2496;
 % y_CG = 0;
-z_CG = 2.66847 - 1.2354;
+% z_CG = 2.66847 - 1.2354;
 
 % MFZW
 % x_CG = 3.2599 - 3.2010;
 % y_CG = 0;
-% z_CG = 2.66847 - 1.4454;
+% z_CG = 2.66847 - 1.2354;
 
 % Maximum Fuel with Zero Payload
 % x_CG = 3.2599 - 3.1349;
@@ -166,7 +166,7 @@ z_CG = 2.66847 - 1.2354;
 % average mass, CG and moment of inertia during patient transport
 x_CG = 0;
 y_CG = 0;
-% z_CG = 2.66847 - 1.3532;
+z_CG = 2.66847 - 1.3532;
 
 %% 1 Force arms
 
@@ -217,7 +217,7 @@ l_HT = x_CG + x_HT;
 I_xx = 5.6409e+03;
 I_yy = 3.4489e+04;
 I_zz = 2.8995e+04;
-I_xz = 1.1102e+04;
+I_xz = 1.2291e+04;
 
 %% 4 Rotor Aerodynamic Model
 

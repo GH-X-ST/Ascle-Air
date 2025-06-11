@@ -2,7 +2,7 @@ function constants = getConstants()
 %SETUPCONSTANTS Returns a struct with all constants used in rotor modeling
 
     % Parameters from initial sizing of rotor
-    constants.GTOW = 3491;                        % kg
+    constants.GTOW = 3160.668;                    % kg
     constants.Nb = 3;                             % number of blades
     constants.AR = 20;                            % aspect ratio
     constants.Vtip = 220;                         % tip speed [m/s]

@@ -19,7 +19,7 @@ function [theta_LR, theta_UR, theta_1s, theta_1c, phi, theta, delta_E, delta_R] 
 %% 0 Basic Parameters
 
 % 0.1 Initial guess
-x0 = [0.2788; 0.2323; deg2rad(-3); 0; 0; 0; deg2rad(0); deg2rad(0)];
+x0 = [0.2788; 0.2323; deg2rad(-3); 0; 0; 0; deg2rad(9); deg2rad(0)];
 
 % fsolve options
 opts = optimoptions('fsolve', ...
@@ -32,23 +32,12 @@ opts = optimoptions('fsolve', ...
 
 function F = trimResiduals(x)
 
-    %lb = [0; 0; deg2rad(-5); deg2rad(-0.5); deg2rad(-5); deg2rad(-5); deg2rad(-10); deg2rad(-10)];
-    %ub = [deg2rad(20); deg2rad(20); 0; deg2rad(0.5); deg2rad(5); deg2rad(5); deg2rad(10); deg2rad(10)];
+    lb = [0; 0; deg2rad(-5); deg2rad(-0.5); deg2rad(-5); deg2rad(-5); deg2rad(-10); deg2rad(-10)];
+    ub = [deg2rad(20); deg2rad(20); 0; deg2rad(0.5); deg2rad(5); deg2rad(5); deg2rad(10); deg2rad(10)];
 
-    %x = min( max(x, lb), ub );
+    x = min( max(x, lb), ub );
     
-    % MTOW
     params = [1524, 3160.668, 9.80665, 0.52992, 0.682, 0.682, 5.5, 5.5];
-    
-    % MFZW
-    % params = [1524, 2460.668, 9.80665, 0.52992, 0.682, 0.682, 5.5, 5.5];
-   
-    % Maximum Fuel with Zero Payload
-    % params = [1524, 2554.468, 9.80665, 0.52992, 0.682, 0.682, 5.5, 5.5];
-
-    % Linearization Point
-    % average mass, CG and moment of inertia during patient transport
-    % params = [1524, 2630.668, 9.80665, 0.52992, 0.682, 0.682, 5.5, 5.5];
 
     % Unpack
     theta_LR  = x(1);

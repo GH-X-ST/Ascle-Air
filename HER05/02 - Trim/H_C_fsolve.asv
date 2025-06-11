@@ -1,4 +1,4 @@
-function [theta_LR, theta_UR, theta_1s, theta_1c, phi, theta, delta_E, delta_R] = F_fsolve(u)
+function [theta_LR, theta_UR] = H_C_fsolve(w)
 % Author:
 %   Hanchen Li (hl3422@ic.ac.uk)
 %
@@ -19,7 +19,7 @@ function [theta_LR, theta_UR, theta_1s, theta_1c, phi, theta, delta_E, delta_R] 
 %% 0 Basic Parameters
 
 % 0.1 Initial guess
-x0 = [0.2788; 0.2323; deg2rad(-3); 0; 0; 0; deg2rad(0); deg2rad(0)];
+x0 = [0.2788; 0.2323];
 
 % fsolve options
 opts = optimoptions('fsolve', ...
@@ -31,39 +31,31 @@ opts = optimoptions('fsolve', ...
 %% 2. Residual function
 
 function F = trimResiduals(x)
-
-    %lb = [0; 0; deg2rad(-5); deg2rad(-0.5); deg2rad(-5); deg2rad(-5); deg2rad(-10); deg2rad(-10)];
-    %ub = [deg2rad(20); deg2rad(20); 0; deg2rad(0.5); deg2rad(5); deg2rad(5); deg2rad(10); deg2rad(10)];
-
-    %x = min( max(x, lb), ub );
     
+    lb = [0; 0];
+    ub = [deg2rad(100); deg2rad(100)];
+    x = min( max(x, lb), ub );
+
     % MTOW
-    params = [1524, 3160.668, 9.80665, 0.52992, 0.682, 0.682, 5.5, 5.5];
+    % params = [1524, 3160.668, 9.80665, 0.52992, 0.682, 0.682, 5.5, 5.5];
     
     % MFZW
     % params = [1524, 2460.668, 9.80665, 0.52992, 0.682, 0.682, 5.5, 5.5];
    
     % Maximum Fuel with Zero Payload
-    % params = [1524, 2554.468, 9.80665, 0.52992, 0.682, 0.682, 5.5, 5.5];
+    params = [1524, 2554.468, 9.80665, 0.52992, 0.682, 0.682, 5.5, 5.5];
 
     % Linearization Point
     % average mass, CG and moment of inertia during patient transport
-    % params = [1524, 2630.668, 9.80665, 0.52992, 0.682, 0.682, 5.5, 5.5];
+    params = [1524, 2554.468, 9.80665, 0.52992, 0.682, 0.682, 5.5, 5.5];
 
     % Unpack
     theta_LR  = x(1);
     theta_UR  = x(2);
-    theta_1s  = x(3);
-    theta_1c  = x(4);
-    phi       = x(5);
-    theta     = x(6);
-    delta_E   = x(7);
-    delta_R   = x(8);
 
     % Build ctrl & state
-    ctrl  = [theta_LR, theta_UR, theta_1s, theta_1c, delta_E, delta_R];
-    state = [u, 0, 0, 0, 0, 0, 0, 0, 0];
-    state(7:8) = [phi, theta];  % insert Euler angles into state
+    ctrl  = [theta_LR, theta_UR, 0, 0, 0, 0];
+    state = [0, 0, w, 0, 0, 0, 0, 0, 0];
 
     % Call your force-moment model
     [X, Y, Z, L, M, N, ~, ~, ~, ~] = FM_N(state, ctrl, params);
@@ -87,11 +79,5 @@ end
 %% 4. Inspect solution
 theta_LR = x_trim(1);
 theta_UR = x_trim(2);
-theta_1s  = x_trim(3);
-theta_1c  = x_trim(4);
-phi       = x_trim(5);
-theta     = x_trim(6);
-delta_E   = x_trim(7);
-delta_R   = x_trim(8);
 
 end

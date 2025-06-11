@@ -32,7 +32,22 @@ opts = optimoptions('fsolve', ...
 
 function F = trimResiduals(x)
     
-    params = [1524, 3491, 9.80665, 0.9, 0.682, 0.682, 5.5, 5.5];
+    lb = [0; 0];
+    ub = [deg2rad(100); deg2rad(100)];
+    x = min( max(x, lb), ub );
+
+    % MTOW
+    % params = [1524, 3160.668, 9.80665, 0.52992, 0.682, 0.682, 5.5, 5.5];
+    
+    % MFZW
+    % params = [1524, 2460.668, 9.80665, 0.52992, 0.682, 0.682, 5.5, 5.5];
+   
+    % Maximum Fuel with Zero Payload
+    % params = [1524, 2554.468, 9.80665, 0.52992, 0.682, 0.682, 5.5, 5.5];
+
+    % Linearization Point
+    % average mass, CG and moment of inertia during patient transport
+    params = [1524, 2630.668, 9.80665, 0.52992, 0.682, 0.682, 5.5, 5.5];
 
     % Unpack
     theta_LR  = x(1);
