@@ -47,14 +47,15 @@ modes.phugoid     = pick(wnSorted,numel(wnSorted));
 sortedReal = realRoots(iReal);
 
 % 3.2 roll-subsidence is fastest (most negative) real root
-modes.rollSubsidence = abs(sortedReal( numel(sortedReal) ));
+modes.rollSubsidence = abs(sortedReal(1));
 
 % 3.3 heave (w-subsidence) is second-most-negative real root
-modes.heave = pick( abs(sortedReal), numel(sortedReal)-1 );
+modes.heave = pick(abs(sortedReal),2);
 
 % 3.4 spiral is real root closest to the imaginary axis
-[~,iSpiral] = min( abs(realRoots) );
-modes.spiral = abs( real(realRoots(iSpiral)) );
+nzReal       = realRoots( abs(real(realRoots)) > 1e-4 );   % tolerance
+[~,iS]       = min(abs(nzReal));
+modes.spiral = abs(real(nzReal(iS)));
 
 %% A Helper
 % safe element picker (returns NaN if index is out of bounds)
