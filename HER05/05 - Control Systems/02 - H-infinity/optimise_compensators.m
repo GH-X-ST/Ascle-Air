@@ -535,7 +535,7 @@ while ~strcmpi(flag,'exit')
     pause(0.5);
 
     fprintf('\n\n--- Iteration %d successfully completed! ---\n', ii);
-    fprintf('Robust stability margin achieved: %.4f\n', emaxC_tmp(ii));
+    fprintf('Optimised gamma value: %.4f\n', emaxC_tmp(ii));
     
     % Setting input variables for next iteration's LMI optimisation
     decvarsIN = decvarsOUT;
@@ -870,7 +870,8 @@ else
         mag_data = frd(modD2(kk,:).', omega);
         D2_cells{kk} = fitmag_updated(mag_data);
     end
-    D2 = diag(cell2mat(D2_cells));
+    % D2 = diag(cell2mat(D2_cells));
+    D2 = blkdiag(D2_cells{:});
 end
 
 % Constructing Weights through Spectral Factorisation
@@ -981,7 +982,7 @@ function sys = fitmag_updated(mag_frd)
 flag = 'y';
 h_fit_fig = figure;
 % loglog(mag_frd.Frequency, mag_frd.ResponseData, 'y.');
-loglog(mag_frd.Frequency(:, 1), squeeze(mag_frd.ResponseData(1, 1, :)), 'y.');
+loglog(mag_frd.Frequency(:, 1), squeeze(mag_frd.ResponseData(1, 1, :)), 'm.');
 hold on; grid on;
 title('Fit Magnitude Data');
 xlabel('Frequency (rad/s)'); ylabel('Magnitude');
