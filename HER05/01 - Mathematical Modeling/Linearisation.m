@@ -53,6 +53,7 @@ nx = 9;
 nu = 6;
 A = zeros(nx, nx);
 B = zeros(nx, nu);
+state  = state(:);
 
 % 0.1 Extract parameters
 % state - [u, v, w, p, q, r, phi, theta, psi]
@@ -91,28 +92,28 @@ x_VT = params(8);
 
 %% 1 Linearisation
 
-% 2.1 Compute state derivatives at nominal (unperturbed) point
+% 1.1  Derivative at the nominal point (optional, kept for reference)
 f0 = stateDerivative(state, ctrl_trans, params);
 
-% 2.2 Build A by perturbing each state component
+% 1.2  Build A  (perturb each state component)
 for i = 1:nx
-    dx     = zeros(nx, 1);
-    dx(i)  = delta;
-    f_up   = stateDerivative(state + dx, ctrl_trans, params);
-    f_down = stateDerivative(state - dx, ctrl_trans, params);
-    A(:, i) = (f_up - f_down) / (2 * dx(i));
-end
-    
-% 2.3 Build B by perturbing each control input (in transformed space)
-for j = 1:nu
-    du     = zeros(1, nu);
-    du(j)  = delta;
-    f_up   = stateDerivative(state, ctrl_trans + du, params);
-    f_down = stateDerivative(state, ctrl_trans - du, params);
-    B(:, j) = (f_up - f_down) / (2 * du(j));
+    dx        = zeros(nx,1);   % 9 × 1 column – same orientation as ‘state’
+    dx(i)     = delta;
+    f_up      = stateDerivative(state + dx, ctrl_trans, params);
+    f_down    = stateDerivative(state - dx, ctrl_trans, params);
+    A(:,i)    = (f_up - f_down) / (2 * delta);   % dx(i) == delta
 end
 
-% 2.4 Extract matrices
+% 1.3  Build B  (perturb each control input)
+for j = 1:nu
+    du        = zeros(1,nu);   % 1 × 6 row – matches ‘ctrl_trans’
+    du(j)     = delta;
+    f_up      = stateDerivative(state, ctrl_trans + du, params);
+    f_down    = stateDerivative(state, ctrl_trans - du, params);
+    B(:,j)    = (f_up - f_down) / (2 * delta);   % du(j) == delta
+end
+
+% 1.4 Extract matrices
 
 idxLon = [1  3  5  8];
 idxLat = [2  4  6  7  9];
