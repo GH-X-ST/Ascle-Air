@@ -70,7 +70,7 @@ end
 
 %% Checking and setting optional inputs
 if (nargin < 3) || isempty(Weight_bounds)
-    Weight_bounds = [ss(1e10) ss(1); ss(1e-10) ss(1)];
+    Weight_bounds = [ss(1e5) ss(1); ss(1e-5) ss(1)];
 end
 
 % if ~isequal(size(Weight_bounds), [2,2])
