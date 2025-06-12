@@ -1,4 +1,4 @@
-function [beta_0,beta_1c,beta_1s,beta,beta_ast] = getFlappingResponse(u,v,p,q,rho,theta_0,theta_1c,theta_1s,theta_tw,lambda,geometry)
+function [beta_0,beta_1c,beta_1s,beta,beta_ast] = getFlappingResponse(u,v,p,q,rho,theta_0,theta_1c,theta_1s,theta_tw)
 % All input and output angles are radians
 
 % Extract parameters
@@ -11,6 +11,14 @@ I_b = geometry.Ib;
 v_beta = geometry.v_beta;
 K_beta = geometry.K_beta;
 Cl_alpha = geometry.CLalpha;
+
+e       = constants.e;
+V_tip    = constants.Vtip;      % m/s
+R       = constants.R;         % m
+c    = constants.cbar;      % mean chord
+Cd0     = constants.Cd0;       % profile drag coefficient
+Omega   = constants.Omega;     % angular speed
+
 
 % Lock Number
 gamma = rho * c * Cl_alpha * R^4/I_b;
@@ -26,6 +34,9 @@ beta_P = deg2rad(beta_p_deg);
 % Roll and Pitch Rates
 p_hat = p / Omega;
 q_hat = q / Omega;
+
+% Lambda
+lambda = sqrt(0.5*CT + 0.25*mu.^2 ) - 0.5*mu;
 
 % Solve for constants
 beta_0 = (120*K_beta*beta_P - 20*I_b*Omega^2*gamma*lambda + 15*I_b*Omega^2*gamma*theta_0 + 12*I_b*Omega^2*gamma*theta_tw + 15*I_b*Omega^2*gamma*theta_0*u_bar^2 + 10*I_b*Omega^2*gamma*theta_tw*u_bar^2 + 15*I_b*Omega^2*gamma*theta_0*v_bar^2 + 10*I_b*Omega^2*gamma*theta_tw*v_bar^2 + 10*I_b*Omega^2*gamma*p_hat*u_bar + 10*I_b*Omega^2*gamma*q_hat*v_bar + 20*I_b*Omega^2*gamma*theta_1s*u_bar + 20*I_b*Omega^2*gamma*theta_1c*v_bar)/(120*(I_b*Omega^2*v_beta^2 + K_beta));
