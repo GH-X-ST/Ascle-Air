@@ -15,7 +15,7 @@ S = b*c;
 
 % Calculate alpha
 dv = v + r*l_VT;
-phi = atand(dv/u);
+phi = atan2d(dv,u);
 alpha = phi + rad2deg(deltaR); % [deg]
 
 if abs(alpha) > 19.75
