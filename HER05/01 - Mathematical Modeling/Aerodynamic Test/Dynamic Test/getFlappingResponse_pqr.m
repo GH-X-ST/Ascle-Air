@@ -91,8 +91,11 @@ u_bar = Vx / V_tip;               % forward speed ratio
 v_bar = Vy / V_tip;               % lateral speed ratio
 
 % Normalised body rates
-p_hat  = p / Omega;
-q_hat  = q / Omega;
+p_hat_body =  p / Omega;
+q_hat_body =  q / Omega;
+
+p_hat = -p_hat_body;
+q_hat = -q_hat_body;
 
 % Advance ratio for inflow model (|μ|) and inflow λ (same as before)
 mu     = sqrt(u_bar.^2 + v_bar.^2);
