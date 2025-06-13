@@ -11,7 +11,7 @@ S = geometry.HT.S;                     % area [m^2]
 
 % Calculate alpha
 dw = w + q*l_HT;
-phi = atand(dw/u);
+phi = atan2d(dw,u);
 alpha = phi - rad2deg(deltaE); % [deg]
 
 if abs(alpha) > 19.75 
