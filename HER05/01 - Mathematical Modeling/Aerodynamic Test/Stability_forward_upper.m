@@ -1,4 +1,4 @@
-function [T, H, Y, Q, Mx, My, Cq_i, beta1c_UR, beta1s_UR] = Stability_forward_upper(u, v, w, a_input, rho_input, mu_input, m_input, g_input, polar, theta_0_u, theta_0_l, theta_1c, theta_1s)
+function [T, H, Y, Q, Mx, My, Cq_i, beta1c_UR, beta1s_UR] = Stability_forward_upper(u, v, w, p, q, a_input, rho_input, mu_input, m_input, g_input, polar, theta_0_u, theta_0_l, theta_1c, theta_1s)
 
 % all pitch inputs (theta_0_u, theta_0_l, theta_1c, theta_1s) are RADIANS
 
@@ -36,9 +36,15 @@ Omega   = constants.Omega;     % angular speed
 
 theta_tw_u = constants.theta_tw_u;
 TR_u = 1;
-% v  = 0;
-Vc = -w;
-Vx = u;
+
+Vx   =  u;
+Vy   =  v;
+Vc   = -w;
+
+mu_x =  Vx / Vtip;
+mu_y =  Vy / Vtip;
+mu   =  hypot(mu_x,mu_y);
+
 Cw = (g_input*GTOW/(rho_input*Ae*Vtip^2));
 
 % Parameter Input
@@ -157,7 +163,10 @@ count = 1;
     % [beta,beta_dot] = getFlappingForwardResponse(Vx, e,Ct_u_req,theta_0_u*180/pi,theta_tw_u*180/pi,theta_1c,theta_1s, 'upper'); % inputs are degree
 
     % [Beta, Beta_dot, beta_1c_rad, beta_1s_rad] = getFlappingResponse(Vx, rho_input, m_input, CT, theta0_u_rad, theta0_l_rad, theta_1c_rad, theta_1s_rad, rotor)
-    [beta, beta_dot, beta1c_UR, beta1s_UR] = getFlappingResponse(Vx, rho_input, m_input, Ct_u_req, theta_0_u, theta_0_l, theta_1c, theta_1s, 'upper'); % inputs are radian
+    % [beta, beta_dot, beta1c_UR, beta1s_UR] = getFlappingResponse(Vx, rho_input, m_input, Ct_u_req, theta_0_u, theta_0_l, theta_1c, theta_1s, 'upper'); % inputs are radian
+
+    % [Beta, Beta_dot, beta_1c_rad, beta_1s_rad] = getFlappingResponse_pqr(Vx, rho_input, m_input, CT, theta0_u_rad, theta0_l_rad, theta_1c_rad, theta_1s_rad, rotor, Vy, p, q)
+    [beta, beta_dot, beta1c_UR, beta1s_UR] = getFlappingResponse_pqr(Vx, rho_input, m_input, Ct_u_req, theta_0_u, theta_0_l, theta_1c, theta_1s, 'upper', v, p, q);
 
     % at each discretised azimuth location dpsi
     for i = 1:length(azimuth)
@@ -171,11 +180,11 @@ count = 1;
             % linear inflow model at each blade element
             if abs(u) <= 30
 
-                [lambda_i,lambda_j] = LinearInflow_ff_test(mu_x, lambda_c, alpha_s, Ct_u_req, r(j), psi);
+                [lambda_i,lambda_j] = LinearInflow_ff_test(mu, lambda_c, alpha_s, Ct_u_req, r(j), psi);
 
             else
                 
-                [lambda_i,lambda_j] = LinearInflow_ff(mu_x, lambda_c, alpha_s, Ct_u_req, r(j), psi);
+                [lambda_i,lambda_j] = LinearInflow_ff(mu, lambda_c, alpha_s, Ct_u_req, r(j), psi);
 
             end
 
@@ -183,7 +192,7 @@ count = 1;
             lambda_induced(i,j) = lambda_i;
 
             % calculate blade sectional velocity
-            U_T = Omega*r(j)*R + mu_x*Vtip*sin(psi);
+            U_T = Omega*r(j)*R + Vtip*( mu_x * sin(psi)  -  mu_y * cos(psi));
             U_P = (lambda_c + lambda_i)*Vtip + r(j)*R*beta_dot(psi) + Vx*beta(psi)*cos(psi); % ignored flapping terms
             U_t(i,j) = U_T;
             U_p(i,j) = U_P;

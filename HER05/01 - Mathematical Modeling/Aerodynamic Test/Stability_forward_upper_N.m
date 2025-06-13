@@ -1,9 +1,6 @@
-function [T, H, Y, Q, Mx, My, Cq_i, beta1c_LR, beta1s_LR] = Stability_forward_lower(u, v, w, p, q, a_input, rho_input, mu_input, m_input, g_input, polar, theta_0_l, theta_0_u, theta_1c, theta_1s)
+function [T, H, Y, Q, Mx, My, Cq_i, beta1c_UR, beta1s_UR] = Stability_forward_upper(u, v, w, a_input, rho_input, mu_input, m_input, g_input, polar, theta_0_u, theta_0_l, theta_1c, theta_1s)
 
 % all pitch inputs (theta_0_u, theta_0_l, theta_1c, theta_1s) are RADIANS
-
-% noted that theta_0_u (here) = theta_0_l (in actual)
-% and theta_0_l (here) = theta_0_u (in actual)
 
 % Get all constants
 constants = getConstants();  % or use setupConstants() directly if you prefer
@@ -32,27 +29,21 @@ Omega   = constants.Omega;     % angular speed
 % theta input is radian now (Hanchen)
 
 % theta_1c = constants.theta_1c; % deg;
-% theta_1s = constants.theta_1s; %  deg;  
+% theta_1s = constants.theta_1s; % deg;
 
 % addpath('Airfoil');
 % polar = loadPolarData('xf-rc410-il-1000000.txt');
 
-theta_tw_u = constants.theta_tw_l; % too lazy to change the naming to lower so here is lower rotor
+theta_tw_u = constants.theta_tw_u;
 TR_u = 1;
-
-Vx   =  u;
-Vy   =  v;
-Vc   = -w;
-
-mu_x =  Vx / Vtip;
-mu_y =  Vy / Vtip;
-mu   =  hypot(mu_x,mu_y);
-
+% v  = 0;
+Vc = -w;
+Vx = u;
 Cw = (g_input*GTOW/(rho_input*Ae*Vtip^2));
 
 % Parameter Input
 % theta_tw_u = theta_tw_u/R*pi/180*R;
-% theta_0_u = theta_0_u * pi/180;
+% theta_0_u = theta_0_u*pi/180;
 
 % BladeGeometryInput = [theta_tw_u,theta_tw_l, TR_u, TR_l, d];
 
@@ -163,13 +154,10 @@ count = 1;
 
     % flapping respons - at 140 knots, 
     % assuming e = 0.1; theta_1s_deg = -3; % from paper -- flight test; theta_1c_deg = 0.2; % from paper -- flight test
-    % [beta,beta_dot] = getFlappingForwardResponse(Vx, e,Ct_u_req,theta_0_u*180/pi,theta_tw_u*180/pi,theta_1c,theta_1s, 'lower'); % inputs are degree
+    % [beta,beta_dot] = getFlappingForwardResponse(Vx, e,Ct_u_req,theta_0_u*180/pi,theta_tw_u*180/pi,theta_1c,theta_1s, 'upper'); % inputs are degree
 
     % [Beta, Beta_dot, beta_1c_rad, beta_1s_rad] = getFlappingResponse(Vx, rho_input, m_input, CT, theta0_u_rad, theta0_l_rad, theta_1c_rad, theta_1s_rad, rotor)
-    % [beta, beta_dot, beta1c_LR, beta1s_LR] = getFlappingResponse(Vx, rho_input, m_input, Ct_u_req, theta_0_l, theta_0_u, theta_1c, theta_1s, 'lower'); % inputs are radian
-
-    % [Beta, Beta_dot, beta_1c_rad, beta_1s_rad] = getFlappingResponse_pqr(Vx, rho_input, m_input, CT, theta0_u_rad, theta0_l_rad, theta_1c_rad, theta_1s_rad, rotor, Vy, p, q)
-    [beta, beta_dot, beta1c_LR, beta1s_LR] = getFlappingResponse_pqr(Vx, rho_input, m_input, Ct_u_req, theta_0_l, theta_0_u, theta_1c, theta_1s, 'lower', v, p, q);
+    [beta, beta_dot, beta1c_UR, beta1s_UR] = getFlappingResponse(Vx, rho_input, m_input, Ct_u_req, theta_0_u, theta_0_l, theta_1c, theta_1s, 'upper'); % inputs are radian
 
     % at each discretised azimuth location dpsi
     for i = 1:length(azimuth)
@@ -183,11 +171,11 @@ count = 1;
             % linear inflow model at each blade element
             if abs(u) <= 30
 
-                [lambda_i,lambda_j] = LinearInflow_ff_test(mu, lambda_c, alpha_s, Ct_u_req, r(j), psi);
+                [lambda_i,lambda_j] = LinearInflow_ff_test(mu_x, lambda_c, alpha_s, Ct_u_req, r(j), psi);
 
             else
                 
-                [lambda_i,lambda_j] = LinearInflow_ff(mu, lambda_c, alpha_s, Ct_u_req, r(j), psi);
+                [lambda_i,lambda_j] = LinearInflow_ff(mu_x, lambda_c, alpha_s, Ct_u_req, r(j), psi);
 
             end
 
@@ -195,7 +183,7 @@ count = 1;
             lambda_induced(i,j) = lambda_i;
 
             % calculate blade sectional velocity
-             U_T = Omega*r(j)*R + Vtip*( mu_x * sin(psi)  -  mu_y * cos(psi));
+            U_T = Omega*r(j)*R + mu_x*Vtip*sin(psi);
             U_P = (lambda_c + lambda_i)*Vtip + r(j)*R*beta_dot(psi) + Vx*beta(psi)*cos(psi); % ignored flapping terms
             U_t(i,j) = U_T;
             U_p(i,j) = U_P;
@@ -254,9 +242,9 @@ count = 1;
             dH(i,j) = Nb*(dFx*sin(psi) + dFr*cos(psi));   % Rotor drag force
             dY(i,j) = Nb*(-dFx*cos(psi) + dFr*sin(psi));  % Rotor side force
             dQ(i,j) = Nb*dFx*r(j)*R;
+            
             dMx(i,j) = Nb*dFz*r(j)*R*sin(psi);
             dMy(i,j) = Nb*dFz*r(j)*R*cos(psi);
-
             % sectional thrust coeff
             dCt_j(i,j) = dT(i,j)/(rho_input*Ae*Vtip^2);
             dCt_j2(i,j) = Nb*dFz2/(rho_input*Ae*Vtip^2);
@@ -290,7 +278,6 @@ count = 1;
 
         Mx_j(i) = sum(dMx(i,:));
         My_j(i) = sum(dMy(i,:));
-
         % Sum sectional power to get overall Cp at the azimuth angle
         Cp_j(i) = sum(dCp_j(i,:));
         Cp_induced_j(i) = sum(dCp_induced_j(i,:));
@@ -341,9 +328,7 @@ L_to_D = Ct_u_req*mu_x/(Cp_i(end)); % rotor lift-to-drag
 L_to_D2 = Ct_u_req*mu_x/(Cp_i(end)+0.5*S_f*Cd_f/Ae*mu_x^3); % helicopter lift-to-drag
 
 
-% theta_0_l = theta_0_u;
-
-
+% theta_0_u = theta_0_u;
 
 % disp([' ----------- Upper rotor -----------']);
 % disp(['Collective pitch angle initial estimate at Vx = ', num2str(Vx), 'm/s and Vc = ', 'm/s is: ', num2str(theta_0_u_initial*180/pi), ' degree.']);

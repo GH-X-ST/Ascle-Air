@@ -33,8 +33,11 @@ theta_tw_l = theta_tw_l/R*pi/180*R;
 TR_u = 1;
 TR_l = 1; 
 d = 0;
-u = 0;
-v = 0;
+
+mu_x =  u / Vtip;
+mu_y =  v / Vtip;
+mu   =  hypot(mu_x,mu_y);
+
 Vc = -w;
 
 % [~, ~, Ct_u_final, Ct_l_final] = BEMT_axial_optimisation_func(theta_tw_u,theta_tw_l, TR_u, TR_l, Vc, polar);
@@ -104,6 +107,9 @@ count = 1;
 % while abs(eps) > tol
 % % for i = 1:10
 
+for i = 1:length(azimuth)
+    psi = azimuth(i);
+
     % for each discretised blade element
     for j = 2:length(r)-1
        
@@ -112,7 +118,7 @@ count = 1;
         pitch_j = theta_0_u + theta_tw_u*(r(j));
  
         % calculate blade sectional velocity
-        U_T = Omega*r(j)*R;        
+        U_T = Omega*r(j)*R + Vtip*( mu_x * sin(psi)  -  mu_y * cos(psi) );       
         % U_P = (lambda_c + lambda_induced_j)*Vtip;
         % U_t(i,j) = U_T;
         % U_p(i,j) = U_P;
@@ -150,14 +156,14 @@ count = 1;
         
         % incremental thrust
         % dCt_j(j) = sigma_j*Cl_alpha/2 * (pitch_j - phi) * r(j)^2 * dr; % without small angle approx
-        dCt_j2(j) = sigma_j*Cl_alpha/2 * ((pitch_j) * r(j)^2 - lambda_j(j)*r(j)) * dr; % with small angle approx
-        dCt_j3(j) = 4*F*lambda_j(j)*(lambda_j(j) - lambda_c)*r(j)*dr;
-        dCl_j(j) = Cl_alpha*(pitch_j - phi - AoA_zl);
+        dCt_j2(i,j) = sigma_j*Cl_alpha/2 * ((pitch_j) * r(j)^2 - lambda_j(j)*r(j)) * dr; % with small angle approx
+        dCt_j3(i,j) = 4*F*lambda_j(j)*(lambda_j(j) - lambda_c)*r(j)*dr;
+        dCl_j(i,j) = Cl_alpha*(pitch_j - phi - AoA_zl);
 
         % dCt_j4(j) = Nb*0.5*rho*U^2*c_u(r(j))*Cl*dr*R/(rho_input*Ae*Vtip^2);
-        dT_j(j) = dCt_j2(j)*(rho_input*Ae*Vtip^2);
+        dT_j(i,j) = dCt_j2(i,j)*(rho_input*Ae*Vtip^2);
 
-        dCp_j(j) = dCt_j3(j)*(lambda_j(j) - lambda_c);
+        dCp_j(i,j) = dCt_j3(i,j)*(lambda_j(j) - lambda_c);
 
         % incremental power
   
@@ -166,10 +172,15 @@ count = 1;
 
     end
 
+    Ct_psi_u(i) = sum(dCt_j2(i ,:));
+    Cp_psi_u(i) = sum(dCp_j(i ,:));
+
+end
+
     % Sum sectional thrust to get overall Ct
-    Ct_j_u = sum(dCt_j2);
-    T_u = sum(dT_j);
-    Cp_j = sum(dCp_j);
+    Ct_j_u = trapz(azimuth, Ct_psi_u) / (2*pi);
+    Cp_j   = trapz(azimuth, Cp_psi_u) / (2*pi);
+    T_u    = Ct_j_u * rho_input * Ae * Vtip^2;
 
     Q_UR = Cp_j * rho_input * Ae * Vtip^3 / Omega;
     
@@ -224,6 +235,9 @@ eps_l = 1;
 % while abs(eps_l) > tol
 % % for i = 1:10
 
+for i = 1:length(azimuth)
+    psi = azimuth(i);
+
     % for each discretised blade element
     for j = 2:length(r)-1
         
@@ -233,7 +247,7 @@ eps_l = 1;
         pitch_j = theta_0_l + theta_tw_l*(r(j));
 
         % calculate blade sectional velocity
-        U_T = Omega*r(j)*R;
+        U_T = Omega*r(j)*R + Vtip*( mu_x * sin(psi)  -  mu_y * cos(psi) );
 
         % if r(j) <= r_c
         %     U_P = (lambda_c + lambda_induced+A_Ac*lambda_u(j))*Vtip;
@@ -282,26 +296,36 @@ eps_l = 1;
 
         % incremental thrust
         % dCt_j(j) = sigma_j*Cl_alpha/2 * (pitch_j - phi) * r(j)^2 * dr; % without small angle approx
-        dCt_j_l(j) = sigma_j*Cl_alpha/2 * ((pitch_j) * r(j)^2 - lambda_j_l(j)*r(j)) * dr; % with small angle approx
+        dCt_j_l(i,j) = sigma_j*Cl_alpha/2 * ((pitch_j) * r(j)^2 - lambda_j_l(j)*r(j)) * dr; % with small angle approx
         % dCt_j2(j) = 4*F*lambda_j(j)*(lambda_j(j) - lambda_c)*r(j)*dr;
-        dCl_j_l(j) = Cl_alpha*(pitch_j - phi - AoA_zl);
+        dCl_j_l(i,j) = Cl_alpha*(pitch_j - phi - AoA_zl);
 
         % dCt_j2_l(j) = Nb*0.5*rho*U^2*c_l(r(j))*Cl*dr*R/(rho*Ae*Vtip^2);
-        dT_j_l(j) = dCt_j_l(j)*(rho_input*Ae*Vtip^2);
+        dT_j_l(i,j) = dCt_j_l(i,j)*(rho_input*Ae*Vtip^2);
 
         % incremental power
-        dCp_j_l(j) = dCt_j_l(j)*(lambda_j_l(j) - lambda_c);
+        dCp_j_l(i,j) = dCt_j_l(i,j)*(lambda_j_l(j) - lambda_c);
 
         % dCp_induced_j_l(j) = dCt_j2_l(j)*lambda_j_l(j);
         % dCp_profile_j_l(j) = Nb*(0.5*rho*U^2*c_l(r(j))*Cd*dr*R)*U_T/(rho*Ae*Vtip^3); % profile power
 
     end
 
-    % Sum sectional thrust to get overall Ct
-    Ct_j_l = sum(dCt_j_l);
-    Cp_j_l = sum(dCp_j_l);
+    Ct_psi_l(i) = sum(dCt_j_l(i ,:));
+    Cp_psi_l(i) = sum(dCp_j_l(i ,:));
 
-    T_l = sum(dT_j_l);
+end
+
+    % Sum sectional thrust to get overall Ct
+    Ct_j_l = trapz(azimuth, Ct_psi_l) / (2*pi);
+    Cp_j_l = trapz(azimuth, Cp_psi_l) / (2*pi);
+    T_l    = Ct_j_l * rho_input * Ae * Vtip^2;
+
+    % Sum sectional thrust to get overall Ct
+    % Ct_j_l = sum(dCt_j_l);
+    % Cp_j_l = sum(dCp_j_l);
+
+    % T_l = sum(dT_j_l);
 
     Q_LR = Cp_j_l * rho_input * Ae * Vtip^3 / Omega;
 

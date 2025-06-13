@@ -230,15 +230,15 @@ if abs(u) <= 5
 
     [T_UR, T_LR, CT_UR, CT_LR, ~, ~, Q_UR, Q_LR] = Stability_hover_getT(u, v, w, a, rho, mu, m, g, polar, theta_UR, theta_LR);
 
-    [~, ~, beta1c_UR, beta1s_UR] = getFlappingResponse(u, rho, m, CT_UR, theta_UR, theta_LR, theta_1c, theta_1s, 'upper');
-    [~, ~, beta1c_LR, beta1s_LR] = getFlappingResponse(u, rho, m, CT_LR, theta_UR, theta_LR, theta_1c, theta_1s, 'lower');
+    [~, ~, beta1c_UR, beta1s_UR] = getFlappingResponse_pqr(u, rho, m, CT_UR, theta_UR, theta_LR, theta_1c, theta_1s, 'upper', v, p, q);
+    [~, ~, beta1c_LR, beta1s_LR] = getFlappingResponse_pqr(u, rho, m, CT_LR, theta_UR, theta_LR, theta_1c, theta_1s, 'lower', v, p, q);
 
 else
 
     % 4.3 Forward flight aerodynamics & dynamics
 
     [T_UR, T_LR, H_UR, H_LR, Y_UR, Y_LR, Q_UR, Q_LR, Mx_UR, My_UR, Mx_LR, My_LR, ~, ~, beta1c_UR, beta1s_UR, beta1c_LR, beta1s_LR] = ...
-        Stability_forward(u, v, w, a, rho, mu, m, g, polar, theta_UR, theta_LR, theta_1c, theta_1s);
+        Stability_forward(u, v, w, p, q, a, rho, mu, m, g, polar, theta_UR, theta_LR, theta_1c, theta_1s);
 
     Q_UR = -Q_UR; % to reaction torque
 

@@ -82,7 +82,6 @@ mu = V_forward / V_tip;      % advance ratio
 beta_p_deg = 2.5;  % Pre-cone angle in deg
 beta_p_rad = deg2rad(beta_p_deg);
 
-
 % === Lambda ===
 lambda = sqrt(0.5*CT + 0.25*mu.^2 ) - 0.5*mu;
 
