@@ -215,7 +215,7 @@ end
 % Ct_l_req = Ct_l_final; % thrust coeff required by upper rotor (Ct_u/Ct_l = 1.2461)
 
 % Non dimensional induced velocity
-lambda_hover = sqrt(Cw/2/2); % hover induced velocity
+lambda_hover = sqrt(abs(Cw)/4); % hover induced velocity
 lambda_induced = -lambda_c/2 + lambda_hover*sqrt((0.5*lambda_c/lambda_hover)^2 + 1); % induced velocity at climb (Momentum Theory)
 % lambda_total = lambda_induced+lambda_c; % lambda_total = lambda_induced + lambda_climb
 
