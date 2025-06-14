@@ -224,7 +224,7 @@ I_xz = 1.1102e+04;
 % 4.1 Load airfoil data
 polar = loadPolarData('xf-rc410-il-1000000.txt');
 
-if abs(u) <= 5
+if abs(u) <= 10
     
     % 4.2 Hover and climb aerodynamics & dynamics
 
