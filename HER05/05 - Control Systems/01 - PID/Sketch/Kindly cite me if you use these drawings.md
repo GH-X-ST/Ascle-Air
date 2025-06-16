@@ -1,0 +1,1 @@
+Li H. Helicopter Emergency Rescue (HER25): Flight Dynamics Modelling, Trim Analysis, Basic Stability Augmentation and Autopilot Design. 2025.
