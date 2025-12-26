@@ -48,4 +48,4 @@ The aim of this project is to design the perfect rotorcraft for HEMS operations,
 *  PowerPoint Template
 ### Past Reports
 *  [Past Best Group Design Project Reports](General/A%20-%20Past%20Best%20Reports/)
-*  [Past Best Helicopter Design Reports](General/B%20-%20Past%20Helicopter5%20Reports/)
+*  [Past Best Helicopter Design Reports](General/B%20-%20Past%20Helicopter%20Reports/)
