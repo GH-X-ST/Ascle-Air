@@ -37,4 +37,15 @@ The aim of this project is to design the perfect rotorcraft for HEMS operations,
 * Vehicle static and dynamic stability prediction
 * Response to control inputs
 * Design of flight control system
-* Aircraft performance prediction
+* Aircraft performance prediction<br>
+&nbsp;
+
+## Resources
+### [Brand Guideline](General/01%20-%20Brand%20Guideline/)
+*  Fonts
+*  Logo
+*  Report Template
+*  PowerPoint Template
+### Past Reports
+*  [Past Best Group Design Project Reports](General/A%20-%20Past%20Best%20Reports/)
+*  [Past Best Helicopter Design Reports](General/A%20-%20Past%20Helicopter5%20Reports/)
