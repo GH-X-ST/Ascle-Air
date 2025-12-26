@@ -1,9 +1,9 @@
-Helicopter Emergency Medical Services (HEMS) are crucial for providing rapid medical response, especially in situations where ground transport is too slow or inaccessible. HEMS plays a vital role in
-saving lives by quickly reaching accident scenes, transporting critically ill patients, and ensuring timely medical interventions. It is particularly essential in rural, mountainous, or congested urban areas where rapid evacuation can make the difference between life and death.
+![Cover](General/01%20-%20Brand%20Guideline/Logo/HALO_PREVIEW.jpg)
+Helicopter Emergency Medical Services (HEMS) aircraft are currently adaptations of existing helicopter models, which, whilst adequate, are limited in their ability to serve the specific needs of the HEMS mission. The HALO project presents a novel design in the 3,500-ton class that utilises coaxial rotors for lift, capable of cruising at 140 kts with a range of over 600 km. Powered by twin Honeywell HTS9000 engines, HALO includes advanced aerodynamic features such as active flow control to minimise fuel burn and improve cruise speed. The H tail allows for rear loading and best-in-class turnaround times, whilst the onboard electronics and air conditioning provide for up to 35,000 W of auxiliary power for clinical equipment. Advanced stability augmentation allows for a smooth ride for clinicians and patients alike, with gust correction and multichannel tracking.
 
-Current HEMS aircraft are existing helicopters retrofitted for medical missions. While highly capable, they have design drawbacks that limit their effectiveness, such as limited cabin space, noise and vibration issues, performance limitations (in hot-and-high conditions or adverse weather), range constraints, operating and maintenance costs, safety concerns and environmental constraints (e.g. noise levels). 
-
-The aim of this project is to design the perfect rotorcraft for HEMS operations, providing optimised cabin layout for medical operations, enhance safety features, performance improvements, noise and vibration reduction, cost and maintenance efficiency and all-weather operations.
+<p align="center">
+  <img src="General/C%20-%20Final%20Submissions/Render2.png" width="800">
+</p>
 
 ## Roles
 ### [HER01](HER01/) - Project Coordinators
@@ -14,7 +14,7 @@ The aim of this project is to design the perfect rotorcraft for HEMS operations,
 ### [HER02](HER02/) - Aerodynamics
 *  Rotor(s) design
 *  Design of lifting surfaces
-*  Airfoil selection / design / optimizations
+*  Airfoil selection & design & optimizations
 *  Fuselage and empennage aerodynamic design
 ### [HER03](HER03/) - Structural Design & CAD
 *  Prediction of design loading conditions
@@ -23,16 +23,16 @@ The aim of this project is to design the perfect rotorcraft for HEMS operations,
 *  Material and manufacturing method selection
 *  Landing gear design
 *  Hub design
-*  CAD modeling
-### [HER04](HER04/) - Flight Mechanics, Performance & Control
+*  CAD modelling
+### [HER04](HER04/) - Systems & Propulsion
 * Powerplant type selection & integration
 * Powerplant sizing and performance prediction
 * Transmission considerations
-* Vehicle sub-systems selection / sizing, layout and integration
+* Vehicle sub-systems selection & sizing, layout and integration
 * Sensors and avionics
 * Weight & Balance prediction
 * Medical and mission-specific equipment
-### [HER05](HER05/) - Systems & Propulsion
+### [HER05](HER05/) - Flight Mechanics, Performance & Control
 * Mission definition and operations
 * Vehicle static and dynamic stability prediction
 * Response to control inputs
@@ -44,8 +44,8 @@ The aim of this project is to design the perfect rotorcraft for HEMS operations,
 ### [Brand Guideline](General/01%20-%20Brand%20Guideline/)
 *  Fonts
 *  Logo
-*  Report Template
-*  PowerPoint Template
+*  Report template
+*  PowerPoint template
 ### Past Reports
-*  [Past Best Group Design Project Reports](General/A%20-%20Past%20Best%20Reports/)
-*  [Past Best Helicopter Design Reports](General/B%20-%20Past%20Helicopter%20Reports/)
+*  [Past best Group Design Project reports](General/A%20-%20Past%20Best%20Reports/)
+*  [Past best helicopter design reports](General/B%20-%20Past%20Helicopter%20Reports/)
