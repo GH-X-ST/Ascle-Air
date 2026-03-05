@@ -83,9 +83,9 @@ System architecture, weights, CG, propulsion integration, and equipment placemen
 ### HER05 — Flight Mechanics, Performance & Control
 Mathematical model, trim, stability, control, and performance workflows.
 
-- **01 — Mathematical Modelling:** [Coaxial rotor BEMT scripts, linearisation, Simulink models, and test notebooks](HER05/01%20-%20Mathematical%20Modeling/)
-- **02 — Trim:** [Trim solving and plotting utilities](HER05/02%20-%20Trim/)
-- **03 — Static Stability:** [Static Stability calculation](HER05/03%20-%20Static%20Stability/)
-- **04 — Dynamic Stability:** [Linearisation tools and stability analysis scripts](HER05/04%20-%20Dynamic%20Stability/)
-- **05 — Control Systems:** [PID](HER05/05%20-%20Control%20Systems/01%20-%20PID/), [H-infinity](HER05/05%20-%20Control%20Systems/02%20-%20H-infinity/)
-- **06 — Performance:** [Performance and power calculation scripts](HER05/06%20-%20Performance/)
+- **Mathematical Modelling:** [Coaxial rotor BEMT scripts, linearisation, Simulink models, and test notebooks](HER05/01%20-%20Mathematical%20Modeling/)
+- **Trim:** [Trim solving and plotting utilities](HER05/02%20-%20Trim/)
+- **Static Stability:** [Static Stability calculation](HER05/03%20-%20Static%20Stability/)
+- **Dynamic Stability:** [Linearisation tools and stability analysis scripts](HER05/04%20-%20Dynamic%20Stability/)
+- **Control Systems:** [PID](HER05/05%20-%20Control%20Systems/01%20-%20PID/), [H-infinity](HER05/05%20-%20Control%20Systems/02%20-%20H-infinity/)
+- **Performance Analysis:** [Performance and power calculation scripts](HER05/06%20-%20Performance/)
