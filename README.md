@@ -33,8 +33,8 @@ The concept also looks at **active flow control** for cruise efficiency, an **H-
 ## Deliverables
 Everything you’d typically want to open first:
 
-- **Executive Summary:** [HER25_Executive_Summary.pdf](General/C%20-%20Final%20Submissions/HER25_Executive_Summary.pdf)
-- **Final Presentation:** [final.pptx](General/C%20-%20Final%20Submissions/final.pptx)
+- **Executive summary:** [HER25_Executive_Summary.pdf](General/C%20-%20Final%20Submissions/HER25_Executive_Summary.pdf)
+- **Final presentation:** [final.pptx](General/C%20-%20Final%20Submissions/final.pptx)
 - **Poster:** [PosterA1.pdf](General/C%20-%20Final%20Submissions/PosterA1.pdf)
 &nbsp;
 
@@ -50,27 +50,26 @@ Shared documents, templates, and reference libraries.
 - **Past reports library:** [“best” GDP reports](General/A%20-%20Past%20Best%20Reports/), [rotorcraft GDP reports](General/B%20-%20Past%20Helicopter%20Reports/GDP/), [VFS Student Design Competition](General/B%20-%20Past%20Helicopter%20Reports/VFS%20Student%20Design%20Competition/)
 - **Final submissions:** [Final report, presentation, poster, etc.](General/C%20-%20Final%20Submissions/)
 
-### HER01 — Project Coordinators
-Project coordination, market/cost analysis, and cross-team integration.
 
-- [Market Analysis](HER01/Market_analysis.m)
-- [Cost](HER01/cost.m)
-- [Duties](HER01/Duties%20GDP.docx)
+### HER01 — Project Coordinators
+Project coordination, market analysis, cost calculation, and cross-team integration.
+
+- **Market Analysis:** [Market analysis script](HER01/Market_analysis.m)
+- **Cost:** [Cost estimation](HER01/cost.m)
+- **Duties:** [Duties allocation](HER01/Duties%20GDP.docx)
 
 
 ### HER02 — Aerodynamics
 Aerodynamic design tasks.
 
-- Stability and force scripts: [Horizontal tailplane](HER02/Empennage/FHT.m), [Vertical tailplane](HER02/Empennage/FVT.m)
-- Airfoil reference: [NACA0015](HER02/Empennage/NACA0015.m)
+- **Stability and force calculation:** [Horizontal tailplane](HER02/Empennage/FHT.m), [Vertical tailplane](HER02/Empennage/FVT.m)
 
 
 ### HER03 — Structural Design & CAD
 Structural sizing, mass estimation, and CAD-related calculations.
 
-- Consolidated working script: [Integrated code](HER03/Big_code_of_all_mostly_working_sections.m)
-- Structure weight calculation: [Structure weight estimation](HER03/afdd_structure_weight_estimation.m)
-- Overall weight calculation: [Initial MTOW estimation](HER03/initial_mtow.m)
+- **Consolidated working script:** [Integrated code](HER03/Big_code_of_all_mostly_working_sections.m)
+- **Weight calculation:** [Structure weight estimation](HER03/afdd_structure_weight_estimation.m), [Initial MTOW estimation](HER03/initial_mtow.m)
 
 
 ### HER04 — Systems & Propulsion
@@ -78,7 +77,6 @@ System architecture, weights, CG, propulsion integration, and equipment placemen
 
 - **Weights and CG aggregation:** [Conceptual weights](HER04/conceptual_weights.mlx)
 - **Propulsion:** [Propulsion calculation](HER04/Propulsion.mlx)
-- **Mass input sheets:** [Configuration 1](HER04/mass_input_cfg_1.xlsx), [Configuration 2](HER04/mass_input_cfg_2.xlsx), [Configuration 3](HER04/mass_input_cfg_3.xlsx), [Configuration 4](HER04/mass_input_cfg_4.xlsx)
 - **Placement tools:** [Algorithm](HER04/placement_algo_testing.mlx), [Input](HER04/placement_input.xlsx)
 
 
