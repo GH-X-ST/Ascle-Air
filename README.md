@@ -3,7 +3,8 @@
   <sub>For educational and reference use only. Not an operational design manual, and definitely not certified for anything.</sub><br>
 </p>
 
-![Cover](General/01%20-%20Brand%20Guideline/Logo/HALO_PREVIEW.jpg)
+![Cover light](General/01%20-%20Brand%20Guideline/Logo/HALO_PREVIEW.jpg#gh-light-mode-only)
+![Cover dark](General/01%20-%20Brand%20Guideline/Logo/HALO_PREVIEW_dark.jpg#gh-dark-mode-only)
 
 ## About
 Helicopter Emergency Medical Services (HEMS) aircraft are currently adaptations of existing helicopter models, which, whilst adequate, are limited in their ability to serve the specific needs of the HEMS mission.
