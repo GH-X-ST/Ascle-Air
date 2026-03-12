@@ -95,4 +95,4 @@ Mathematical model, trim, stability, control, and performance workflows.
 
 ## Stargazers Over Time
 [![Stargazers over time light](https://starchart.cc/GH-X-ST/HALO.svg?background=%2300000000&axis=%23232333&line=%23708090)](https://starchart.cc/GH-X-ST/HALO#gh-light-mode-only)
-[![Stargazers over time dark](https://starchart.cc/GH-X-ST/HALO.svg?background=%2300000000&axis=%FFFFFF&line=%9eb3c9)](https://starchart.cc/GH-X-ST/HALO#gh-dark-mode-only)
+[![Stargazers over time dark](https://starchart.cc/GH-X-ST/HALO.svg?background=%2300000000&axis=%23FFFFFF&line=%239eb3c9)](https://starchart.cc/GH-X-ST/HALO#gh-dark-mode-only)
