@@ -91,7 +91,7 @@ Mathematical model, trim, stability, control, and performance workflows.
 - **Control Systems:** [PID](HER05/05%20-%20Control%20Systems/01%20-%20PID/), [H-infinity](HER05/05%20-%20Control%20Systems/02%20-%20H-infinity/)
 - **Performance Analysis:** [Performance and power calculation scripts](HER05/06%20-%20Performance/)
 
-&nbsp;
+---
 
 ## Stargazers Over Time
 [![Stargazers over time light](https://starchart.cc/GH-X-ST/HALO.svg?background=%2300000000&axis=%23232333&line=%23708090)](https://starchart.cc/GH-X-ST/HALO#gh-light-mode-only)
