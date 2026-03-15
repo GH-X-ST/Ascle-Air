@@ -1,6 +1,9 @@
 <p align="center">
-  <sub>Student Group Design Project repository (Department of Aeronautics, Imperial College London).</sub><br>
-  <sub>For educational and reference use only. Not an operational design manual, and definitely not certified for anything.</sub><br>
+  <sub>A group design project presented to the Department of Aeronautics</sub><br>
+  <sub>in partial fulfilment of the requirements for the degree of</sub><br>
+  <sub>Master of Engineering (MEng) in Aeronautical Engineering</sub><br>
+  <sub>at</sub><br>
+  <sub>Imperial College London</sub><br>
 </p>
 
 ![Cover light](General/01%20-%20Brand%20Guideline/Logo/HALO_PREVIEW.jpg#gh-light-mode-only)
